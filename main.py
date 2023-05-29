@@ -1,12 +1,15 @@
 import customtkinter as ctk
 import sqlite3 as sql
 
+
 systemAcces = {"manager":4545,"Manager":4545,"Admin":1212,"admin":1212}
-class interface:
+class interface():
     def __init__(self):
+        
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("green")
         self.wn = ctk.CTk()
+        
         self.wn.geometry("1000x500")
     def responsive(self,window):
         # Make the app responsive horizontally
@@ -40,35 +43,123 @@ class interface:
         self.wn.mainloop()
 
 class admin(interface):
-    def add_user(self):
-        # self.routeurbtn = ctk.CTkButton(self.wn,
-        #                                 text="Login",
-        #                                 width=400,
-        #                                 height=50,
-        #                                 command=lambda: access.login(self)
-        #                                 )
-        # self.routeurbtn.grid(row=4,column=5,sticky="nsew")
-        self.formAddUser = ctk.CTkFrame(self.wn,
-                                        width=200,
-                                        height=2000,
-                                        corner_radius=0,
+    def Home(self):
+        self.fram_Add_Student = ctk.CTkFrame(self.wn,
+                                        corner_radius=9,
+                                        fg_color="transparent",
+                                        border_width=1,
+                                        border_color="green"
                                         )
-        self.formAddUser.grid(row=0,column=0,sticky="nsew")
-        self.responsive(self.formAddUser)
-        self.welcomeAdmin = ctk.CTkLabel(self.formAddUser,
-                                         text="Welcome Mr Admin",
-                                         font=("Arial",35,"bold"),
-                                         text_color="white",
-                                         compound="center",
-                                         anchor="center")
-        self.welcomeAdmin.grid(row=0,column=0,sticky="nsew")
+        self.fram_ShowStudent_Info = ctk.CTkFrame(self.wn,
+                                        corner_radius=9,
+                                        fg_color="transparent",
+                                        border_width=1,
+                                        border_color="red")
+        self.fram_Remove_Student = ctk.CTkFrame(self.wn,
+                                        corner_radius=9,
+                                        fg_color="transparent",
+                                        border_width=1,
+                                        border_color="white")
+        self.fram_About_Founders = ctk.CTkFrame(self.wn,
+                                                corner_radius=9,
+                                                fg_color="transparent",
+                                                border_width=1,
+                                                border_color="blue")
+        self.form_Navigation = ctk.CTkFrame(self.wn,
+                                        corner_radius=0,
+                                        width=250,
+                                        height=2000
+                                        )
+        self.form_Navigation.grid(row=0,column=0,sticky="nsew",rowspan=11)
+        self.welcomeAdmin = ctk.CTkLabel(self.form_Navigation,
+                                        text="Welcome Mr Admin",
+                                        height=90,
+                                        font=ctk.CTkFont(size=20, weight="bold"),
+                                        text_color="white",
+                                        compound="center",
+                                        anchor="center",
+                                         )
+        self.welcomeAdmin.pack(fill="x")
+        self.AddStudent = ctk.CTkButton(self.form_Navigation,
+                                        text="Add user",
+                                        corner_radius=0,
+                                        # width=200,
+                                        height=90,
+                                        fg_color="transparent",
+                                        border_spacing=10,anchor="center",
+                                        font=("Arial",18,"bold"),
+                                        hover_color=("gray70", "gray30"),
+                                        command=self.btn_framAddUser)
+        self.AddStudent.pack(fill="x")
+        self.showStudents_Information = ctk.CTkButton(self.form_Navigation,
+                                        text="Show users",
+                                        corner_radius=0,
+                                        height=90,
+                                        fg_color="transparent",
+                                        border_spacing=10,
+                                        anchor="center",
+                                        font=("Arial",18,"bold"),
+                                        hover_color=("gray70","gray30"),
+                                        command=self.btn_framShowUser
+                                       )
+        self.showStudents_Information.pack(fill="x")
+        self.removeStudent = ctk.CTkButton(self.form_Navigation,
+                                        text="Remove Student",
+                                        height=90,
+                                        corner_radius=0,
+                                        fg_color="transparent",
+                                        border_spacing=10,
+                                        anchor="center",
+                                        font=("Arial",18,"bold"),
+                                        hover_color=("gray70","gray30"),
+                                        command=self.btn_framRemoveUser)
+        self.removeStudent.pack(fill="x")
+        self.AboutFounders = ctk.CTkButton(self.form_Navigation,
+                                           text="About Founders",
+                                           height=90,
+                                           corner_radius=0,
+                                           fg_color="transparent",
+                                           border_spacing=10,
+                                           anchor="center",
+                                           font=("Arial",18,"bold"),
+                                           hover_color=("gray70","gray30"),
+                                           command=self.btn_framAboutFounders)
+        self.AboutFounders.pack(fill="x",side="bottom")
+    def select_Fram_By_Name(self,name):
+        self.name = name
+        
+        if self.name == "addStudent":
+            self.fram_Add_Student.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
+        else:
+            self.fram_Add_Student.grid_forget()
+        if self.name == "showStudent":
+            self.fram_ShowStudent_Info.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
+        else :
+            self.fram_ShowStudent_Info.grid_forget()
+        if self.name == "removeStudent":
+            self.fram_Remove_Student.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
+        else :
+            self.fram_Remove_Student.grid_forget()
+        if self.name == "AboutFounders":
+            self.fram_About_Founders.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
+        else :
+            self.fram_About_Founders.grid_forget()
+    def btn_framAddUser(self):
+        self.select_Fram_By_Name("addStudent")
+    def btn_framShowUser(self):
+        self.select_Fram_By_Name("showStudent")
+    def btn_framRemoveUser(self):
+        self.select_Fram_By_Name("removeStudent")
+    def btn_framAboutFounders(self):
+        self.select_Fram_By_Name("AboutFounders")
+
 class manger(admin):
     def show_data(self):
         self.routeurbtn = ctk.CTkButton(self.wn,
                                         text="Login",
                                         width=400,
-                                        height=50,
-                                        command=lambda:access.login(self)
+                                        height=90,
+                                        command=lambda:access.login(self),
                                         )
         self.routeurbtn.grid(row=4,column=5,sticky="nsew")
 class access(manger):
@@ -160,10 +251,9 @@ class access(manger):
             self.codeEntry.destroy()
             self.codeLabel.destroy()
             self.Loginbutton.destroy()
-            self.add_user()
+            self.Home()
         elif self.valid == "":
             pass
-            
 view = access()
 view.login()
 view.main()
