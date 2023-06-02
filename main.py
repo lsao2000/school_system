@@ -1,5 +1,7 @@
 import customtkinter as ctk
 import sqlite3 as sql
+import re
+from datetime import datetime,date
 
 
 systemAcces = {"manager":4545,"Manager":4545,"Admin":1212,"admin":1212}
@@ -89,7 +91,7 @@ class admin(interface):
                                         border_spacing=10,anchor="center",
                                         font=("Arial",18,"bold"),
                                         hover_color=("gray70", "gray30"),
-                                        command=self.btn_framAddUser)
+                                        command=self.btn_framAddStudent)
         self.AddStudent.pack(fill="x")
         self.showStudents_Information = ctk.CTkButton(self.form_Navigation,
                                         text="Show users",
@@ -100,7 +102,7 @@ class admin(interface):
                                         anchor="center",
                                         font=("Arial",18,"bold"),
                                         hover_color=("gray70","gray30"),
-                                        command=self.btn_framShowUser
+                                        command=self.btn_framShowStudent
                                        )
         self.showStudents_Information.pack(fill="x")
         self.removeStudent = ctk.CTkButton(self.form_Navigation,
@@ -112,7 +114,7 @@ class admin(interface):
                                         anchor="center",
                                         font=("Arial",18,"bold"),
                                         hover_color=("gray70","gray30"),
-                                        command=self.btn_framRemoveUser)
+                                        command=self.btn_framRemoveStudent)
         self.removeStudent.pack(fill="x")
         self.AboutFounders = ctk.CTkButton(self.form_Navigation,
                                            text="About Founders",
@@ -125,9 +127,139 @@ class admin(interface):
                                            hover_color=("gray70","gray30"),
                                            command=self.btn_framAboutFounders)
         self.AboutFounders.pack(fill="x",side="bottom")
+
+        # Added some entry for registration new student
+        self.Fname_Student = ctk.CTkLabel(self.fram_Add_Student,
+                                         text="First name :",
+                                         font=("Arial",15,"bold"))
+        self.Fname_Student.grid(row=1,column=0,sticky="nsew",padx=5)
+        self.Fname_Entry = ctk.CTkEntry(self.fram_Add_Student,
+                                        font=("Arial",20,"bold"),
+                                        corner_radius=10,
+                                        placeholder_text="EX:Lahcen",
+                                        width=200
+                                        )
+        self.Fname_Entry.grid(row=1,column=2,sticky="nsew")
+        self.Lname_Student = ctk.CTkLabel(self.fram_Add_Student,
+                                          text="Last name :",
+                                          font=("Arial",15,"bold"),)
+        self.Lname_Student.grid(row=3,column=0,padx=5,sticky="nsew")
+        self.Lname_Entry = ctk.CTkEntry(self.fram_Add_Student,
+                                        font=("Arial",20,"bold"),
+                                        corner_radius=10,
+                                        placeholder_text="Ex:Skaih")
+        self.Lname_Entry.grid(row=3,column=2,sticky="nsew")
+        self.Date_Payment = ctk.CTkLabel(self.fram_Add_Student,
+                                         text="Date de Paiment :",
+                                         font=("Arial",15,"bold"))
+        self.Date_Payment.grid(row=5,column=0,sticky="nsew",padx=5)
+        self.Date_Entry = ctk.CTkEntry(self.fram_Add_Student,
+                                       font=("Arial",20,"bold"),
+                                       corner_radius=10,
+                                       placeholder_text="EX:30/05/2023")
+        self.Date_Entry.grid(row=5,column=2,sticky="nsew")
+        self.teacher_option = ctk.CTkLabel(self.fram_Add_Student,
+                                           text="Name of teacher :",
+                                           font=("Arial",15,"bold"))
+        self.teacher_option.grid(row=1,column=3,sticky="nsew",padx=5)
+        self.teacher_Entry = ctk.CTkOptionMenu(self.fram_Add_Student,
+                                               values=["",'Said','Zarzar','Masmar'],
+                                               font=("Arial",20,"bold"),
+                                               bg_color="transparent",
+                                               dropdown_fg_color ="gray25",
+                                               button_color="gray25",
+                                               fg_color="gray25",
+                                               button_hover_color="gray25",
+                                               dropdown_font=("Arial",17,"bold"),
+                                               width=200,
+                                               height=30)
+        self.teacher_Entry.grid(row=1,column=5)
+        self.option_course = ctk.CTkLabel(self.fram_Add_Student,
+                                          text="Course option :",
+                                          font=("Arial",15,"bold"))
+        self.option_course.grid(row=3,column=3,sticky="nsew",padx=5)
+        self.option_course_Entry = ctk.CTkOptionMenu(self.fram_Add_Student,
+                                                     font=("Arial",20,"bold"),
+                                                     bg_color="transparent",
+                                                     button_color="gray25",
+                                                     fg_color="gray25",
+                                                     button_hover_color="gray25",
+                                                     width=200,
+                                                     height=30,
+                                                     dropdown_fg_color="gray25",
+                                                     dropdown_font=("Arial",17,"bold"),
+                                                     values=["","Math","Physique","Life and Earth Sciences","Francais"])
+        self.option_course_Entry.grid(row=3,column=5)
+        self.pay_course = ctk.CTkLabel(self.fram_Add_Student,
+                                        text="Course paye :",
+                                        font=("Arial",15,"bold"))
+        self.pay_course.grid(row=5,column=3,sticky="nsew",padx=5)
+        self.pay_course_entry = ctk.CTkOptionMenu(self.fram_Add_Student,
+                                                  font=("Arial",20,"bold"),
+                                                  bg_color="transparent",
+                                                  button_color="gray25",
+                                                  fg_color="gray25",
+                                                  button_hover_color="gray25",
+                                                  width=200,
+                                                  height=30,
+                                                  dropdown_fg_color="gray25",
+                                                  dropdown_hover_color=("gray70","gray30"),
+                                                  dropdown_font=("Arial",17,"bold"),
+                                                  values=["","Oui","Non"])
+        self.pay_course_entry.grid(row=5,column=5)
+        self.btn_checkStudent_registration = ctk.CTkButton(self.fram_Add_Student,
+                                                           font=("Arial",20,"bold"),
+                                                           text="Register",
+                                                           corner_radius=7,
+                                                           height=50,
+                                                           border_width=0,
+                                                           command=self.checkInfoStudent)
+        self.btn_checkStudent_registration.grid(row=7,column=3)
+        self.Errorteacher = ctk.CTkLabel(self.fram_Add_Student,
+                                             text="The teacher has not been add",
+                                             text_color="red")
+        self.ErrorCourse = ctk.CTkLabel(self.fram_Add_Student,
+                                        text="The course has not been add",
+                                        text_color="red")
+        self.ErrorPaiment = ctk.CTkLabel(self.fram_Add_Student,
+                                         text="The paiment has not been add",
+                                         text_color="red")
+        self.responsive(self.fram_Add_Student)
+        self.select_Fram_By_Name("addStudent")
+    def checkInfoStudent(self):
+        if self.Fname_Entry.get() == "" or re.findall(r'[^a-zA-Z]',self.Fname_Entry.get()):
+            self.Fname_Entry.configure(border_color="red",border_width=1)
+            self.ValidFname = "No"
+        else :
+            self.Fname_Entry.configure(border_color="green",border_width=1)
+            self.ValidFname = "Yes"
+        if self.Lname_Entry.get() == "" or re.findall(r'[^a-zA-Z]',self.Lname_Entry.get()):
+            self.Lname_Entry.configure(border_color="red",border_width=1)
+            self.ValidLname = "No"
+        else:
+            self.Lname_Entry.configure(border_color="green",border_width=1)
+            self.ValidLname = "Yes"
+        try :
+            datetime.strptime(self.Date_Entry.get(),"%d/%m/%Y").date()
+            self.Date_Entry.configure(border_color="green",border_width=1)
+            self.ValidDate = "Yes"
+        except :
+            self.Date_Entry.configure(border_width=1,border_color="red")
+            self.ValidDate = "No"
+        self.Errorteacher.grid(row=2, column=5)  if self.teacher_Entry.get() == "" else self.Errorteacher.grid_forget()
+        self.ErrorCourse.grid(row=4, column=5) if self.option_course_Entry.get() == "" else self.ErrorCourse.grid_forget()
+        self.ErrorPaiment.grid(row=6, column=5) if self.pay_course_entry.get() == "" else self.ErrorPaiment.grid_forget()
+        if  self.ValidLname == "Yes" and self.ValidFname == "Yes" and self.ValidDate == "Yes" and self.teacher_Entry.get() != "" \
+            and self.option_course_Entry.get() != "" and self.pay_course_entry.get() != "" :
+            self.insertIntoDatabase(self.Fname_Entry.get(),self.Lname_Entry.get(),self.Date_Entry.get(),self.teacher_Entry.get(),self.option_course_Entry.get(),self.pay_course_entry.get())
+    def insertIntoDatabase(self,fname,lname,date,teacher,course,paiment):
+        print(f"hello Mr{fname} {lname}, you have been register in {date} for {course} with {teacher} and the paiment is : {paiment}")
     def select_Fram_By_Name(self,name):
         self.name = name
-        
+        self.AddStudent.configure(bg_color = ("gray75", "gray25") if self.name == "addStudent" else "transparent")
+        self.showStudents_Information.configure(bg_color = ("gray75", "gray25") if self.name == "showStudent" else "transparent")
+        self.removeStudent.configure(bg_color=("gray75", "gray25") if self.name == "removeStudent" else "transparent")
+        self.AboutFounders.configure(bg_color=("gray75", "gray25") if self.name == "AboutFounders" else "transparent")
         if self.name == "addStudent":
             self.fram_Add_Student.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
         else:
@@ -144,11 +276,16 @@ class admin(interface):
             self.fram_About_Founders.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
         else :
             self.fram_About_Founders.grid_forget()
-    def btn_framAddUser(self):
+    def btn_framAddStudent(self):
         self.select_Fram_By_Name("addStudent")
-    def btn_framShowUser(self):
+        self.ValidFname = ""
+        self.ValidLname = ""
+        self.ValidDate = ""
+        
+         
+    def btn_framShowStudent(self):
         self.select_Fram_By_Name("showStudent")
-    def btn_framRemoveUser(self):
+    def btn_framRemoveStudent(self):
         self.select_Fram_By_Name("removeStudent")
     def btn_framAboutFounders(self):
         self.select_Fram_By_Name("AboutFounders")

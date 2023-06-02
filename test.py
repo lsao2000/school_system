@@ -1,23 +1,59 @@
-import customtkinter as ctk
+# import customtkinter as ctk
+import re
 
-root = ctk.CTk()
-root.rowconfigure(0, weight=1)  # Configure main window row to expand vertically
-root.columnconfigure(0, weight=1)  # Configure main window column to expand horizontally
+# import customtkinter as ctk
 
-frame = ctk.CTkFrame(root,bg_color="red")
-frame.grid(row=0, column=0, sticky='nsew')  # Grid frame to fill main window
+# root = ctk.CTk()
+# def option_selected(value):
+#     print(f'Selected option: {value}')
 
-button1 = ctk.CTkButton(frame, text='Button 1')
-button1.grid(row=0, column=0, sticky='ew')
+# # root = ctk.tk()
 
-button2 = ctk.CTkButton(frame, text='Button 2')
-button2.grid(row=1, column=0, sticky='ew')
+# options = ['Option 1', 'Option 2', 'Option 3']
 
-button3 = ctk.CTkButton(frame, text='Button 3')
-button3.grid(row=2, column=0, sticky='ew')
+# option_menu = ctk.CTkOptionMenu(root, values= options, command=option_selected)
+# option_menu.configure(bg_color='gray75', fg_color='black',  width=15)
+# teacher_Entry = ctk.CTkOptionMenu(root,
+#                                                values=['Said','Zarzar','Masmar'],
+#                                                font=("Arial",15,"bold"),
+#                                                bg_color="transparent",
+#                                                dropdown_fg_color ="black",
+#                                                button_color="gray25",
+#                                                fg_color="gray25",
+                                               
+#                                                width=300)
+# teacher_Entry.pack()
+# option_menu.pack()
 
-button4 = ctk.CTkButton(frame, text='Button 4')
-button4.grid(row=3, column=0, sticky='ew', pady=(10, 0))  # Place button at the bottom with padding
+# root.mainloop()
+import datetime
+import time
+from datetime import date
+s = ""
+# date_pattern = r"\d{1,2}/\d{1,2}/\d{2,4}"
+    
+# if re.match(r"\d{1,2}/\d{1,2}/\d{2,4}", s):
+#     print("yes")
+# else: print("ok")
+from datetime import datetime, date
 
-root.mainloop()
+# def is_future_date(string_date, date_format):
+#     try:
+#         converted_date = datetime.strptime(string_date, date_format).date()
+#         today = date.today()
+#         if converted_date > today:
+#             print("Yes")
+#         else:
+#             print("No")
+#     except ValueError:
+#         print("Invalid date format")
 
+# Example usage
+# date_string = "1-06-2023"
+# format_string = "%d-%m-%Y"
+
+# is_future_date(date_string, format_string)
+if datetime.strptime("15-12-2023","%d-%m-%Y").date():
+    print("yes")
+else:
+    print('no')
