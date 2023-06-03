@@ -1,9 +1,9 @@
 import customtkinter as ctk
 import sqlite3 as sql
 import re
+from tkinter import messagebox
 from datetime import datetime,date
-
-
+from tkinter import ttk
 systemAcces = {"manager":4545,"Manager":4545,"Admin":1212,"admin":1212}
 class interface():
     def __init__(self):
@@ -129,6 +129,7 @@ class admin(interface):
         self.AboutFounders.pack(fill="x",side="bottom")
 
         # Added some entry for registration new student
+        # This is for fram of the addStudent
         self.Fname_Student = ctk.CTkLabel(self.fram_Add_Student,
                                          text="First name :",
                                          font=("Arial",15,"bold"))
@@ -156,7 +157,7 @@ class admin(interface):
         self.Date_Entry = ctk.CTkEntry(self.fram_Add_Student,
                                        font=("Arial",20,"bold"),
                                        corner_radius=10,
-                                       placeholder_text="EX:30/05/2023")
+                                       placeholder_text="EX:2023/05/25")
         self.Date_Entry.grid(row=5,column=2,sticky="nsew")
         self.teacher_option = ctk.CTkLabel(self.fram_Add_Student,
                                            text="Name of teacher :",
@@ -226,6 +227,22 @@ class admin(interface):
                                          text_color="red")
         self.responsive(self.fram_Add_Student)
         self.select_Fram_By_Name("addStudent")
+        # This code bellow for show student data for ckecking the student
+        self.Tree_Form = ctk.CTkFrame(self.fram_ShowStudent_Info,border_color="red",width=700)
+        self.Tree_Form.grid(row=0,column=0,sticky="nsew")
+        self.responsive(self.fram_ShowStudent_Info)
+        self.dataStudentView = ttk.Treeview(self.Tree_Form)
+        self.dataStudentView['columns'] = ("first_name","last_name","teacher")
+        self.dataStudentView.column("first_name", width=100, minwidth=100)
+        self.dataStudentView.column("last_name", width=100, minwidth=100)
+        self.dataStudentView.column("teacher", width=100, minwidth=100)
+        self.dataStudentView.grid(sticky="nsew",row=0,column=0)
+        self.scrollX = ctk.CTkScrollbar(self.fram_ShowStudent_Info,orientation="horizontal",command=self.dataStudentView.xview)
+        self.scrollY = ctk.CTkScrollbar(self.fram_ShowStudent_Info,orientation="vertical",command=self.dataStudentView.yview)
+        self.scrollX.grid(row=10,column=0,columnspan=1)
+        self.scrollY.grid(column=12,row=0,rowspan=1)
+        self.dataStudentView.configure(xscrollcommand=self.scrollX.set,yscrollcommand=self.scrollY.set)
+
     def checkInfoStudent(self):
         if self.Fname_Entry.get() == "" or re.findall(r'[^a-zA-Z]',self.Fname_Entry.get()):
             self.Fname_Entry.configure(border_color="red",border_width=1)
@@ -240,7 +257,7 @@ class admin(interface):
             self.Lname_Entry.configure(border_color="green",border_width=1)
             self.ValidLname = "Yes"
         try :
-            datetime.strptime(self.Date_Entry.get(),"%d/%m/%Y").date()
+            datetime.strptime(self.Date_Entry.get(),"%Y/%m/%d").date()
             self.Date_Entry.configure(border_color="green",border_width=1)
             self.ValidDate = "Yes"
         except :
@@ -252,8 +269,26 @@ class admin(interface):
         if  self.ValidLname == "Yes" and self.ValidFname == "Yes" and self.ValidDate == "Yes" and self.teacher_Entry.get() != "" \
             and self.option_course_Entry.get() != "" and self.pay_course_entry.get() != "" :
             self.insertIntoDatabase(self.Fname_Entry.get(),self.Lname_Entry.get(),self.Date_Entry.get(),self.teacher_Entry.get(),self.option_course_Entry.get(),self.pay_course_entry.get())
+    
     def insertIntoDatabase(self,fname,lname,date,teacher,course,paiment):
-        print(f"hello Mr{fname} {lname}, you have been register in {date} for {course} with {teacher} and the paiment is : {paiment}")
+        # If the information is success insert it to the database
+        self.conn = sql.connect("student.db")
+        self.query = self.conn.cursor()
+        self.query.execute(f"INSERT INTO students (first_name,last_name,teacher,course,date,paiment) VALUES('{fname}','{lname}','{teacher}','{course}','{date}','{paiment}')")
+        self.conn.commit()
+        self.conn.close()
+        # Delete all the value that are given before for insert another student to database
+        self.Fname_Entry.delete(0,'end')
+        self.Lname_Entry.delete(0,"end")
+        self.Date_Entry.delete(0,'end')
+        self.pay_course_entry.set("")
+        self.teacher_Entry.set("")
+        self.option_course_Entry.set("")
+        self.Fname_Entry.configure(border_color="gray")
+        self.Lname_Entry.configure(border_color="gray")
+        self.Date_Entry.configure(border_color="gray")
+        messagebox.showinfo("Succes","The student has been add")
+
     def select_Fram_By_Name(self,name):
         self.name = name
         self.AddStudent.configure(bg_color = ("gray75", "gray25") if self.name == "addStudent" else "transparent")
@@ -276,17 +311,19 @@ class admin(interface):
             self.fram_About_Founders.grid(row= 0,column= 2,sticky= "nsew",pady= 40,columnspan= 10,rowspan=10)
         else :
             self.fram_About_Founders.grid_forget()
+
     def btn_framAddStudent(self):
         self.select_Fram_By_Name("addStudent")
         self.ValidFname = ""
         self.ValidLname = ""
         self.ValidDate = ""
-        
-         
+
     def btn_framShowStudent(self):
         self.select_Fram_By_Name("showStudent")
+
     def btn_framRemoveStudent(self):
         self.select_Fram_By_Name("removeStudent")
+        
     def btn_framAboutFounders(self):
         self.select_Fram_By_Name("AboutFounders")
 
@@ -299,10 +336,12 @@ class manger(admin):
                                         command=lambda:access.login(self),
                                         )
         self.routeurbtn.grid(row=4,column=5,sticky="nsew")
+
 class access(manger):
     def __init__(self):
         interface.__init__(self)
         self.valid = ""
+
     def login(self):
         try: 
             self.routeurbtn.destroy()
@@ -342,6 +381,7 @@ class access(manger):
                                          font=("Arial",35,"bold"),
                                          command=self.checkLogin)
         self.Loginbutton.grid(row=7,column=5,sticky="nsew")
+
     def checkLogin(self):
         if self.userEntry.get() == "Manager" or self.userEntry.get() == "manager":
             self.userEntry.configure(border_color="green")
@@ -391,6 +431,7 @@ class access(manger):
             self.Home()
         elif self.valid == "":
             pass
+
 view = access()
 view.login()
 view.main()
