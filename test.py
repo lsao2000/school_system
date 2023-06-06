@@ -35,7 +35,7 @@ s = ""
 # if re.match(r"\d{1,2}/\d{1,2}/\d{2,4}", s):
 #     print("yes")
 # else: print("ok")
-# from datetime import datetime, date,timedelta
+from datetime import datetime, date,timedelta
 
 # def is_future_date(string_date, date_format):
 #     try:
@@ -115,54 +115,79 @@ s = ""
 
 # window.mainloop()
 
-import customtkinter as tk
-from tkinter import ttk
+# import customtkinter as tk
+# from tkinter import ttk
 
-root = tk.CTk()
+# root = tk.CTk()
 
 
-# Create a Frame to hold the TreeView and scrollbars
-tree_frame = tk.CTkFrame(root,width=300,bg_color="red")
-tree_frame.pack(fill=tk.BOTH, expand=True)
+# # Create a Frame to hold the TreeView and scrollbars
+# tree_frame = tk.CTkFrame(root,width=300,bg_color="red")
+# tree_frame.pack(fill=tk.BOTH, expand=True)
 
-# Create a TreeView widget
-tree = ttk.Treeview(tree_frame)
-tree["columns"] = ("Name", "Age")
-tree.column("#0", width=400, minwidth=100)
-tree.column("Name", width=100, minwidth=100)
-tree.column("Age", width=100, minwidth=100)
+# # Create a TreeView widget
+# tree = ttk.Treeview(tree_frame)
+# tree["columns"] = ("Name", "Age")
+# tree.column("#0", width=400, minwidth=100)
+# tree.column("Name", width=100, minwidth=100)
+# tree.column("Age", width=100, minwidth=100)
 
-tree.heading("#0", text="ID")
-tree.heading("Name", text="Name")
-tree.heading("Age", text="Age")
+# tree.heading("#0", text="ID")
+# tree.heading("Name", text="Name")
+# tree.heading("Age", text="Age")
 
-tree.pack()
+# tree.pack()
 
 # Create horizontal scrollbar
-x_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.HORIZONTAL, command=tree.xview)
-tree.configure(xscrollcommand=x_scrollbar.set)
-x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+# x_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.HORIZONTAL, command=tree.xview)
+# tree.configure(xscrollcommand=x_scrollbar.set)
+# x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
 
 # Create vertical scrollbar
-y_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=tree.yview)
-tree.configure(yscrollcommand=y_scrollbar.set)
-y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+# y_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=tree.yview)
+# tree.configure(yscrollcommand=y_scrollbar.set)
+# y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 # Add items to the tree view
-tree.insert("", "end", text="1", values=("John Doe", 30))
-tree.insert("", "end", text="2", values=("Jane Smith", 25))
-tree.insert("", "end", text="3", values=("Jane Smith", 25))
-tree.insert("", "end", text="4", values=("Jane Smith", 25))
-tree.insert("", "end", text="5", values=("Jane Smith", 25))
-tree.insert("", "end", text="6", values=("Jane Smith", 25))
-tree.insert("", "end", text="7", values=("Jane Smith", 25))
-tree.insert("", "end", text="8", values=("Jane Smith", 25))
-tree.insert("", "end", text="9", values=("Jane Smith", 25))
-tree.insert("", "end", text="10", values=("Jane Smith", 25))
-tree.insert("", "end", text="11", values=("Jane Smith", 25))
-tree.insert("", "end", text="12", values=("Jane Smith", 25))
-tree.insert("", "end", text="13", values=("Jane Smith", 25))
-tree.insert("", "end", text="14", values=("Jane Smith", 25))
-tree.insert("", "end", text="15", values=("Jane Smith", 25))
+# tree.insert("", "end", text="1", values=("John Doe", 30))
+# tree.insert("", "end", text="2", values=("Jane Smith", 25))
+# tree.insert("", "end", text="3", values=("Jane Smith", 25))
+# tree.insert("", "end", text="4", values=("Jane Smith", 25))
+# tree.insert("", "end", text="5", values=("Jane Smith", 25))
+# tree.insert("", "end", text="6", values=("Jane Smith", 25))
+# tree.insert("", "end", text="7", values=("Jane Smith", 25))
+# tree.insert("", "end", text="8", values=("Jane Smith", 25))
+# tree.insert("", "end", text="9", values=("Jane Smith", 25))
+# tree.insert("", "end", text="10", values=("Jane Smith", 25))
+# tree.insert("", "end", text="11", values=("Jane Smith", 25))
+# tree.insert("", "end", text="12", values=("Jane Smith", 25))
+# tree.insert("", "end", text="13", values=("Jane Smith", 25))
+# tree.insert("", "end", text="14", values=("Jane Smith", 25))
+# tree.insert("", "end", text="15", values=("Jane Smith", 25))
 
-root.mainloop()
+# root.mainloop()
+# month = 5
+import sqlite3 as sql
+conn = sql.connect("student.db")
+db = conn.cursor()
+
+# db.execute("SELECT * FROM students WHERE code = 'PC123'")
+# data = db.fetchall()
+# if len(data) > 0:
+#     print("yes")
+# else:
+#     print("no")
+# for i in data:
+#     print(i)
+#     if month == int(i[5].split('/')[1]):
+#         print(i[5])
+db.execute("""CREATE TABLE StudentWarning(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student INT,
+    code TEXT,
+    month TEXT,
+    FOREIGN KEY(student) REFERENCES registerStudent(id) ON DELETE CASCADE
+)
+""")
+# conn.commit()
+# conn.close()
