@@ -29,7 +29,7 @@ import re
 import datetime
 import time
 from datetime import date
-s = ""
+# s = "2/05/2023"
 # date_pattern = r"\d{1,2}/\d{1,2}/\d{2,4}"
     
 # if re.match(r"\d{1,2}/\d{1,2}/\d{2,4}", s):
@@ -50,9 +50,9 @@ from datetime import datetime, date,timedelta
 #     except ValueError:
 #         print("Invalid date format")
 
-# # Example usage
-# date_string = "2023-05-3"
-# format_string = "%Y-%m-%d"
+# # # Example usage
+# date_string = "2023/05/03"
+# format_string = "%Y/%m/%d"
 
 # is_future_date(date_string, format_string)
 # if datetime.strptime("15-12-2023","%d-%m-%Y").date():
@@ -60,7 +60,9 @@ from datetime import datetime, date,timedelta
 # else:
 #     print('no')
 
-
+# day_values = [""]
+# day_values.extend(list(range(1,32)))
+# print(day_values)
 
 # import customtkinter as tk
 
@@ -171,7 +173,7 @@ import sqlite3 as sql
 conn = sql.connect("student.db")
 db = conn.cursor()
 
-# db.execute("SELECT * FROM students WHERE code = 'PC123'")
+# db.execute("DELETE FROM StudentWarning WHERE id_student = 2 ")
 # data = db.fetchall()
 # if len(data) > 0:
 #     print("yes")
@@ -181,13 +183,9 @@ db = conn.cursor()
 #     print(i)
 #     if month == int(i[5].split('/')[1]):
 #         print(i[5])
-db.execute("""CREATE TABLE StudentWarning(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student INT,
-    code TEXT,
-    month TEXT,
-    FOREIGN KEY(student) REFERENCES registerStudent(id) ON DELETE CASCADE
-)
+db.execute("""INSERT INTO specialization(specialise)
+        VALUES('SVT')
 """)
-# conn.commit()
-# conn.close()
+conn.commit()
+conn.close()
+
