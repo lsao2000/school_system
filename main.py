@@ -51,22 +51,19 @@ class admin(interface):
                                         corner_radius=9,
                                         fg_color="transparent",
                                         border_width=1,
-                                        
                                         )
         self.fram_Paiment_Course = ctk.CTkFrame(self.wn,
                                         corner_radius=9,
                                         fg_color="transparent",
-                                        border_width=1,
-                                        )
+                                        border_width=1)
         self.framTopCode = ctk.CTkFrame(self.wn,
                                         corner_radius=9,
                                         fg_color="transparent",
                                         border_width=1)
         self.fram_show_student = ctk.CTkFrame(self.wn,
-                                        corner_radius=9,
-                                        fg_color="transparent",
-                                        border_width=1,
-                                        )
+                                            corner_radius=9,
+                                            fg_color="transparent",
+                                            border_width=1)
         self.fram_code_studentTop = ctk.CTkFrame(self.wn,
                                                  corner_radius=9,
                                                  fg_color="transparent",
@@ -86,13 +83,11 @@ class admin(interface):
         self.fram_About_Founders = ctk.CTkFrame(self.wn,
                                                 corner_radius=9,
                                                 fg_color="transparent",
-                                                border_width=1,
-                                                )
+                                                border_width=1)
         self.form_Navigation = ctk.CTkFrame(self.wn,
                                         corner_radius=0,
                                         width=250,
-                                        height=2000
-                                        )
+                                        height=2000)
         self.form_Navigation.grid(row=0,column=0,sticky="nsew",rowspan=11)
         self.welcomeAdmin = ctk.CTkLabel(self.form_Navigation,
                                         text="Welcome Mr Admin",
@@ -100,13 +95,11 @@ class admin(interface):
                                         font=ctk.CTkFont(size=20, weight="bold"),
                                         text_color="white",
                                         compound="center",
-                                        anchor="center",
-                                        )
+                                        anchor="center")
         self.welcomeAdmin.pack(fill="x")
         self.AddStudent = ctk.CTkButton(self.form_Navigation,
                                         text="إظافة تلميذ",
                                         corner_radius=0,
-                                        # width=200,
                                         height=90,
                                         fg_color="transparent",
                                         border_spacing=10,anchor="center",
@@ -123,8 +116,7 @@ class admin(interface):
                                         anchor="center",
                                         font=("Arial",18,"bold"),
                                         hover_color=("gray70","gray30"),
-                                        command=self.btn_paiment
-                                       )
+                                        command=self.btn_paiment)
         self.PaymentCourse.pack(fill="x")
         self.studentPay_month = ctk.CTkButton(self.form_Navigation,
                                         text="الواجبات الشهرية",
@@ -146,8 +138,7 @@ class admin(interface):
                                         anchor="center",
                                         font=("Arial",18,"bold"),
                                         hover_color=("gray70","gray30"),
-                                        command=self.btn_notification
-                                          )
+                                        command=self.btn_notification)
         self.notification.pack(fill="x")
         self.removeStudent = ctk.CTkButton(self.form_Navigation,
                                            text="مسح تلميذ",
@@ -161,6 +152,17 @@ class admin(interface):
                                            command=self.btn_remove
                                            )
         self.removeStudent.pack(fill="x")
+        self.homepage = ctk.CTkButton(self.form_Navigation,
+                                      text="الصفحة الرئيسية",
+                                      height=90,
+                                      corner_radius=0,
+                                      fg_color="transparent",
+                                      border_spacing=10,
+                                      anchor="center",
+                                      font=("Arial",18,"bold"),
+                                      hover_color=("gray70","gray30"),
+                                      command=lambda:access.login(self))
+        self.homepage.pack(fill="x")
         self.AboutFounders = ctk.CTkButton(self.form_Navigation,
                                            text="عن التطبيق",
                                            height=90,
@@ -386,14 +388,14 @@ class admin(interface):
                                 text="ارجوك املأ كل المعلومات",
                                 text_color="red",
                                 font=("Arial",20,"bold"))
-        self.btn_paiment = ctk.CTkButton(self.fram_Paiment_Course,
+        self.btn_paimentCheck = ctk.CTkButton(self.fram_Paiment_Course,
                                          text="حفظ التغييرات",
                                          font=("Arial",30,"bold"),
                                          height=50,
                                          border_width=0,
                                          command=self.checkPaymentStudent
                                          )
-        self.btn_paiment.grid(row=8, column=4,columnspan=4)
+        self.btn_paimentCheck.grid(row=8, column=4,columnspan=4)
         # now this code bellow for the show student payment fram
         self.responsive(self.fram_show_student)
         self.responsive(self.fram_code_studentTop)
@@ -995,13 +997,15 @@ class admin(interface):
 
 class manger(admin):
     def show_data(self):
-        self.routeurbtn = ctk.CTkButton(self.wn,
-                                        text="Login",
-                                        width=400,
-                                        height=90,
-                                        command=lambda:access.login(self),
-                                        )
-        self.routeurbtn.grid(row=4,column=5,sticky="nsew")
+        self.form_Navigation_Manager = ctk.CTkFrame(self.wn,
+                                                    corner_radius=0
+                                                    )
+        self.form_Navigation_Manager.grid(row=0, column=0, rowspan=11,sticky="nsew", columnspan=1)
+        self.welcomeManager = ctk.CTkLabel(self.form_Navigation_Manager,
+                                           text="مرحبا بالمدير",
+                                           font=("Arial",30,"bold"))
+        self.welcomeManager.pack(fill="x")
+        self.responsive(self.form_Navigation_Manager)
 
 class access(manger):
     def __init__(self):
@@ -1010,9 +1014,20 @@ class access(manger):
 
     def login(self):
         try: 
-            self.routeurbtn.destroy()
+            self.form_Navigation.grid_forget()
+            self.fram_Add_Student.grid_forget()
+            self.fram_code_studentTop.grid_forget()
+            self.fram_Paiment_Course.grid_forget()
+            self.PaymentCourse.grid_forget()
+            self.framTopCode.grid_forget()
+            self.fram_show_student.grid_forget()
+            self.fram_code_removeTop.grid_forget()
+            self.fram_remove_student.grid_forget()
+            self.fram_notification.grid_forget()
+            self.fram_About_Founders.grid_forget()
         except:
             pass
+        
         self.userLabel = ctk.CTkLabel(self.wn,
                                       text="Enter type of your service",
                                       font=("Arial",35,"bold"),
