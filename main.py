@@ -153,7 +153,7 @@ class admin(interface):
                                            )
         self.removeStudent.pack(fill="x")
         self.homepage = ctk.CTkButton(self.form_Navigation,
-                                      text="الصفحة الرئيسية",
+                                      text="تسجيل الخروج",
                                       height=90,
                                       corner_radius=0,
                                       fg_color="transparent",
@@ -680,12 +680,8 @@ class admin(interface):
                 today = datetime.today()
                 if today > future_date:
                     if i[3] in listCode:
-                        index = listCode.index(i[3],0)
-                        if month == listMonth[index]:
-                            pass
-                        else:
-                            query.execute(f"INSERT INTO StudentWarning(id_student,code,month) VALUES({i[0]},'{i[3]}',{month})")
-                            conn.commit()
+                        query.execute(f"UPDATE StudentWarning SET month = {month} WHERE id_student = {i[0]}")
+                        conn.commit()
                     else:
                         query.execute(f"INSERT INTO StudentWarning(id_student,code,month) VALUES({i[0]},'{i[3]}',{month})")
                         conn.commit()
@@ -854,11 +850,15 @@ class admin(interface):
             self.passIdentifier_Entry.configure(border_color="gray")
             messagebox.showinfo("Succes","The student has been add")
         else:
+            # The id is for get the id of the user
             id = self.getID(code)
             newdate = f"{dateRegister.split('/')[0]}-{monthPay}-{dateRegister.split('/')[2]}"
+            # this if statement is for cheking if the code search are correct
+            # if the code is correct return the id 
+            # else it will return None
             if id != None:
                 self.codeSearch.configure(border_color='grey',border_width=1)
-                self.query.execute("SELECT * FROM paymentStudent")
+                self.query.execute(f"SELECT * FROM paymentStudent WHERE student_id = {id}")
                 data = self.query.fetchall()
                 list_id = []
                 list_month = []
@@ -866,43 +866,46 @@ class admin(interface):
                     list_id.append(i[1])
                     list_month.append(i[3])
                 if monthPay in list_month:
-                    index = list_month.index(monthPay)
-                    if list_id[index] == id:
-                        self.msg.configure(text="لقد دفع التلميذ ثمن هذا الشهر")
-                        self.msg.grid(row=7, column=4)
-                    else : 
-                        self.msg.grid_forget()
-                        self.query.execute(f"""
-                                            UPDATE registerStudent
-                                            SET date_register = '{newdate}' ,specialisation = '{specialization}', education_level = '{level_education}', course = '{course}', price = {int(price)}, instructor = '{instructor}'
-                                            WHERE code = '{code}'
-                                        """)
+                    self.msg.configure(text="لقد دفع التلميذ ثمن هذا الشهر")
+                    self.msg.grid(row=7, column=4)
+                elif len(list_month) > 0 :
+                    if int(monthPay) < int(list_month[-1]) :
+                        self.query.execute(f"DELETE FROM paymentStudent WHERE student_id = {id} AND payment_month = '{list_month[-1]}'")
                         self.conn.commit()
-                        self.query.execute(f"""
-                                            INSERT INTO paymentStudent(student_id,payment_day,payment_month)
-                                            VALUES('{int(id)}','{int(dayPayment)}','{int(monthPay)}')
-                                        """)
-                        self.conn.commit()
-                        self.query.execute(f"DELETE FROM StudentWarning WHERE code = '{code}' AND month = {monthPay}")
+                        self.insertRowInDatabase(newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor)
                         self.update()
-                else:
-                    self.query.execute(f"""
-                                        UPDATE registerStudent
-                                        SET date_register = '{newdate}' ,specialisation = '{specialization}', education_level = '{level_education}', course = '{course}', price = {int(price)}, instructor = '{instructor}'
-                                        WHERE code = '{code}'
-                                    """)
-                    self.conn.commit()
-                    self.query.execute(f"""
-                                        INSERT INTO paymentStudent(student_id,payment_day,payment_month)
-                                        VALUES('{int(id)}','{int(dayPayment)}','{int(monthPay)}')
-                                    """)
-                    self.conn.commit()
-                    self.query.execute(f"DELETE FROM StudentWarning WHERE code = '{code}' AND month = {monthPay}")
+                    elif int(list_month[-1]) == 12:
+                        self.insertRowInDatabase(newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor)
+                        self.update()
+                    else :
+                        self.insertRowInDatabase(newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor)
+                        self.update()
+                # this statement for the first payment
+                else: 
+                    self.insertRowInDatabase(newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor)
                     self.update()
             else:
                 self.codeEdentifier_Entry.configure(border_color="red")
         self.conn.commit()
         self.conn.close()
+    # This function for insert payment course into our database and update some table
+    def insertRowInDatabase(self,newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor):
+        self.conn = sql.connect("student.db")
+        self.query = self.conn.cursor()
+        id = self.getID(code)
+        self.query.execute(f"""
+                            UPDATE registerStudent
+                            SET date_register = '{newdate}' ,specialisation = '{specialization}', education_level = '{level_education}', course = '{course}', price = {int(price)}, instructor = '{instructor}'
+                            WHERE code = '{code}'
+                        """)
+        self.conn.commit()
+        self.query.execute(f"""
+                            INSERT INTO paymentStudent(student_id,payment_day,payment_month)
+                            VALUES('{int(id)}','{int(dayPayment)}','{int(monthPay)}')
+                        """)
+        self.conn.commit()
+        self.query.execute(f"DELETE FROM StudentWarning WHERE code = '{code}' AND month = {monthPay}")
+        self.conn.commit()
 
     def update(self):
         self.first_name_Entry.configure(border_color="gray")
@@ -1001,11 +1004,197 @@ class manger(admin):
                                                     corner_radius=0
                                                     )
         self.form_Navigation_Manager.grid(row=0, column=0, rowspan=11,sticky="nsew", columnspan=1)
-        self.welcomeManager = ctk.CTkLabel(self.form_Navigation_Manager,
-                                           text="مرحبا بالمدير",
-                                           font=("Arial",30,"bold"))
-        self.welcomeManager.pack(fill="x")
         self.responsive(self.form_Navigation_Manager)
+        self.fram_addRemove_Option = ctk.CTkFrame(self.wn,
+                                                border_width=1,
+                                                corner_radius=9,
+                                                fg_color="transparent",
+                                                )
+        self.fram_teacher_notification = ctk.CTkFrame(self.wn,
+                                                      fg_color="transparent",
+                                                      corner_radius=9,
+                                                      border_width=1,
+                                                      )
+        self.fram_teacher_pay = ctk.CTkFrame(self.wn,
+                                             border_width=1,
+                                             corner_radius=9,
+                                             fg_color="transparent",
+                                             )
+        self.welcomeManager = ctk.CTkLabel(self.form_Navigation_Manager,
+                                            text="مرحبا بالمدير",
+                                            font=("Arial",30,"bold"),
+                                            height=90,
+                                            text_color="white",
+                                            compound="center",
+                                            anchor="center")
+        self.welcomeManager.pack(fill="x")
+        self.addRemove_moreOption_Btn = ctk.CTkButton(self.form_Navigation_Manager,
+                                            text='اضافة / مسح',
+                                            corner_radius=0,
+                                            height=90,
+                                            fg_color="transparent",
+                                            border_spacing=10,anchor="center",
+                                            font=("Arial",18,"bold"),
+                                            hover_color=("gray70","gray30"),
+                                            command=self.function_addRemoveOption)
+        self.addRemove_moreOption_Btn.pack(fill="x")
+        self.show_teacher_student_notificationBtn = ctk.CTkButton(self.form_Navigation_Manager,
+                                                               text="اشعارات التلاميذ",
+                                                               corner_radius=0,
+                                                               height=90,
+                                                               fg_color="transparent",
+                                                               border_spacing=10,
+                                                               anchor="center",
+                                                               font=("Arial",18,"bold"),
+                                                               hover_color=("gray70","gray30"),
+                                                               command=self.function_showNotification)
+        self.show_teacher_student_notificationBtn.pack(fill="x")
+        self.tacher_month_payBtn = ctk.CTkButton(self.form_Navigation_Manager,
+                                              corner_radius=0,
+                                              height=90,
+                                              fg_color="transparent",
+                                              border_spacing=10,
+                                              anchor="center",
+                                              font=("Arial",18,"bold"),
+                                              hover_color=("gray70","gray30"),
+                                              text="اجر الاستاذ",
+                                              command=self.function_teacherPay)
+        self.tacher_month_payBtn.pack(fill="x")
+        self.logout_manager = ctk.CTkButton(self.form_Navigation_Manager,
+                                            text="تسجيل الخروج",
+                                            corner_radius=0,
+                                            height=90,
+                                            fg_color="transparent",
+                                            border_spacing=10,
+                                            anchor="center",
+                                            font=("Arial",18,"bold"),
+                                            hover_color=("gray70","gray30"),
+                                            command=lambda:access.login(self))
+        self.logout_manager.pack(fill="x")
+        # This code bellow is for add and remove option like teacher,course,levelEducation 
+        self.responsive(self.fram_addRemove_Option)
+        self.Entry_addOption = ctk.CTkEntry(self.fram_addRemove_Option,
+                                            height=50,
+                                            placeholder_text="استاذ",
+                                            border_width=1,
+                                            width=200,
+                                            font=("Arial",30,"bold"))
+        self.Entry_addOption.grid(row=1, column=4)
+        self.Btn_addOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
+                                               values=['الاستاذ',"التخصص","المادة","المستوى"],
+                                               height=50,
+                                               width=200,
+                                               fg_color="gray25",
+                                               button_color="gray25",
+                                               button_hover_color=("gray70","gray30"),
+                                               dropdown_hover_color=("gray70","gray30"),
+                                               hover=("gray70","gray30"),
+                                               font=("Arial",30,"bold"),
+                                               dropdown_font=("Arial",20,"bold"))
+        self.Btn_addOption.grid(row=1, column=8)
+        self.btn_add = ctk.CTkButton(self.fram_addRemove_Option,
+                                     text="إظافة",
+                                     font=("Arial",25,"bold"),
+                                     command=self.addOption)
+        self.btn_add.grid(row=2, column=7)
+        self.listOption = []
+        self.Btn_removeOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
+                                               values=['الاستاذ',"التخصص","المادة","المستوى"],
+                                               height=50,
+                                               width=200,
+                                               fg_color="gray25",
+                                               button_color="gray25",
+                                               button_hover_color=("gray70","gray30"),
+                                               dropdown_hover_color=("gray70","gray30"),
+                                               hover=("gray70","gray30"),
+                                               font=("Arial",30,"bold"),
+                                               dropdown_font=("Arial",20,"bold"),
+                                               command=self.select_Option)
+        self.Btn_removeOption.grid(row=3, column=8)
+        self.Entry_removeOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
+                                                    values=[''],
+                                                    height=50,
+                                                    width=200,
+                                                    fg_color="gray25",
+                                                    button_color="gray25",
+                                                    button_hover_color=("gray70","gray30"),
+                                                    dropdown_hover_color=("gray70","gray30"),
+                                                    hover=("gray70","gray30"),
+                                                    font=("Arial",30,"bold"),
+                                                    dropdown_font=("Arial",20,"bold"))
+        self.Entry_removeOption.grid(row=3,column=4)
+        self.btn_removeItem = ctk.CTkButton(self.fram_addRemove_Option,
+                                     text="حذف",
+                                     fg_color="red",
+                                     font=("Arial",25,"bold"),
+                                     hover_color="red"
+                                     )
+        self.btn_removeItem.grid(row=4, column=7)
+        # Set default value to the entry removeOption 
+        self.select_Option('')
+        self.select_Frame("addRemoveOption")
+    
+    def addOption(self):
+        option = self.Btn_addOption.get()
+        optionSelect = self.Entry_addOption.get()
+        if option == "التخصص":
+            print("takhasos")
+        elif option == "المادة":
+            print("المادة")
+        elif option == "الاستاذ":
+            print("ostad")
+        elif option == "المستوى" :
+            print("المستوى")
+
+    def insertToDatabase(self,table,value,column):
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        query.execute(f"INSERT INTO '{table}'(column) VALUES('{column}') ")
+
+    # This function for make a dynamic changes in the option menu
+    def select_Option(self,table):
+        table = self.Btn_removeOption.get()
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        # remove all the element in the list for updating the list
+        self.listOption.clear()
+        if table == "الاستاذ":
+            query.execute(f'SELECT * FROM teachers')
+        elif table == "المستوى":
+            query.execute(f'SELECT * FROM level_Education')
+        elif table == "المادة":
+            query.execute(f'SELECT * FROM courses')
+        elif table == "التخصص":
+            query.execute(f'SELECT * FROM specialization')
+        line = query.fetchall()
+        for i in line:
+            self.listOption.append(i[1])
+        self.Entry_removeOption.configure(values=self.listOption)
+        self.Entry_removeOption.set(self.listOption[1])
+
+    def select_Frame(self,name):
+        self.addRemove_moreOption_Btn.configure(bg_color=("gray75", "gray25") if name == "addRemoveOption" else "transparent")
+        self.show_teacher_student_notificationBtn.configure(bg_color=("gray75", "gray25") if name == "showNotification" else "transparent")
+        self.tacher_month_payBtn.configure(bg_color=("gray75", "gray25") if name == "teacherPay" else "transparent")
+        if name == "addRemoveOption":
+            self.fram_addRemove_Option.grid(row=1, column=2, sticky="nsew", columnspan=9,rowspan=9)
+        else : self.fram_addRemove_Option.grid_forget()
+        if name == "showNotification":
+            self.fram_teacher_notification.grid(row=1, column=2, sticky="nsew", rowspan=9, columnspan=9)
+        else: self.fram_teacher_notification.grid_forget()
+        if name == "teacherPay":
+            self.fram_teacher_pay.grid(row=1, column=2, sticky="nsew", columnspan=9, rowspan=9)
+        else : self.fram_teacher_pay.grid_forget() 
+    
+    def function_addRemoveOption(self):
+        self.select_Frame("addRemoveOption")
+    
+    def function_showNotification(self):
+        self.select_Frame("showNotification")
+    
+    def function_teacherPay(self):
+        self.select_Frame("teacherPay")
+
 
 class access(manger):
     def __init__(self):
@@ -1027,7 +1216,13 @@ class access(manger):
             self.fram_About_Founders.grid_forget()
         except:
             pass
-        
+        try :
+            self.form_Navigation_Manager.grid_forget()
+            self.fram_addRemove_Option.grid_forget()
+            self.fram_teacher_notification.grid_forget()
+            self.fram_teacher_pay.grid_forget()
+        except:
+            pass
         self.userLabel = ctk.CTkLabel(self.wn,
                                       text="Enter type of your service",
                                       font=("Arial",35,"bold"),
