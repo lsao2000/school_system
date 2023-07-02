@@ -172,7 +172,13 @@ from datetime import datetime, date,timedelta
 import sqlite3 as sql
 conn = sql.connect("student.db")
 db = conn.cursor()
-
+db.execute("""SELECT * FROM StudentWarning 
+            INNER JOIN registerStudent 
+            ON StudentWarning.id_student = registerStudent.id
+            WHERE instructor = 'مساعد ياسين'
+            """)
+line = db.fetchall()
+print(line)
 # db.execute("DELETE FROM StudentWarning WHERE id_student = 2 ")
 # if len(data) > 0:
 #     print("yes")
@@ -182,14 +188,14 @@ db = conn.cursor()
 #     print(i)
 #     if month == int(i[5].split('/')[1]):
 #         print(i[5])
-db.execute("""DELETE FROM PaymentStudent
-""")
+# db.execute("""DELETE FROM StudentWarning
+# """)
 # data = db.fetchall()
 # if len(data)>0:
 # for i in data:
 #     print(data[1])
 # print(data)
-conn.commit()
+# conn.commit()
 # listCode = []
 # listMonth = []
 # db.execute('SELECT * FROM StudentWarning')
@@ -200,40 +206,40 @@ conn.commit()
 # print(dict(zip(listCode, listMonth)))
 conn.close()
 
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 
-def new_Notification():
-    conn = sql.connect("student.db")
-    query = conn.cursor()
-    listCode = []
-    listMonth = []
+# def new_Notification():
+#     conn = sql.connect("student.db")
+#     query = conn.cursor()
+#     listCode = []
+#     listMonth = []
     
     # Fetching data from StudentWarning table
-    query.execute('SELECT * FROM StudentWarning')
-    lines = query.fetchall()
-    for j in lines:
-        listCode.append(j[2])
-        listMonth.append(j[3])
+    # query.execute('SELECT * FROM StudentWarning')
+    # lines = query.fetchall()
+    # for j in lines:
+    #     listCode.append(j[2])
+    #     listMonth.append(j[3])
     
     # Fetching data from registerStudent table
-    query.execute('SELECT * FROM registerStudent')
-    line = query.fetchall()
-    for i in line:
-        if i[4] is not None:
-            passe_date = datetime.strptime(i[4], "%Y-%m-%d")
-            future_date = passe_date + timedelta(days=30)
-            today = datetime.today()
+    # query.execute('SELECT * FROM registerStudent')
+    # line = query.fetchall()
+    # for i in line:
+    #     if i[4] is not None:
+    #         passe_date = datetime.strptime(i[4], "%Y-%m-%d")
+    #         future_date = passe_date + timedelta(days=30)
+    #         today = datetime.today()
             
             # Checking if the difference between today and future_date is 1, 31, 61, etc.
-            day_difference = (today - future_date).days
-            if day_difference in [1, 31, 61, 121, 181, 241, 301, 361]:
-                if i[3] in listCode and day_difference == 1:
-                    continue
-                else:
-                    month = int(i[4].split('-')[1])
-                    if (i[3], month) not in zip(listCode, listMonth):
-                        query.execute(f"INSERT INTO StudentWarning(id_student, code, month) VALUES({i[0]}, '{i[3]}', {month})")
-                        conn.commit()
+            # day_difference = (today - future_date).days
+            # if day_difference in [1, 31, 61, 121, 181, 241, 301, 361]:
+            #     if i[3] in listCode and day_difference == 1:
+            #         continue
+    #             else:
+    #                 month = int(i[4].split('-')[1])
+    #                 if (i[3], month) not in zip(listCode, listMonth):
+    #                     query.execute(f"INSERT INTO StudentWarning(id_student, code, month) VALUES({i[0]}, '{i[3]}', {month})")
+    #                     conn.commit()
     
-    conn.close()
+    # conn.close()
 # new_Notification()

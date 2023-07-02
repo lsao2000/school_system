@@ -438,7 +438,7 @@ class admin(interface):
         self.dataStudentView.column("#6",stretch=False,minwidth=120,width=140)
         self.dataStudentView.column("#7",stretch=False,minwidth=60,width=100)
         self.dataStudentView.column("#8",stretch=False,minwidth=60,width=100)
-        self.dataStudentView.place(relx=0.0259,rely=0.1,width=600,height=400)
+        self.dataStudentView.place(relx=0.0259,rely=0.1,relwidth=0.89)
         self.scrollX.grid(row=10, column=1, sticky="ew",columnspan=10)
         self.scrollY.grid(row=1,column=12,sticky='ns',rowspan=9)
         # This code bellow is for notification form that show the students that they have to pay 
@@ -946,7 +946,7 @@ class admin(interface):
             self.framTopCode.grid_forget()
         if self.name == "studentPay_month":
             self.fram_show_student.grid(row= 1,column= 2, sticky= "nsew", pady= 5, columnspan= 10, rowspan=11)
-            self.fram_code_studentTop.grid(row=0, column=2, sticky="nsew", columnsp=10, rowspan=1)
+            self.fram_code_studentTop.grid(row=0, column=2, sticky="nsew", columnspan=10, rowspan=1)
         else :
             self.fram_show_student.grid_forget()
             self.fram_code_studentTop.grid_forget()
@@ -1000,6 +1000,7 @@ class admin(interface):
 
 class manger(admin):
     def show_data(self):
+        self.responsive(self.wn)
         self.form_Navigation_Manager = ctk.CTkFrame(self.wn,
                                                     corner_radius=0
                                                     )
@@ -1010,6 +1011,10 @@ class manger(admin):
                                                 corner_radius=9,
                                                 fg_color="transparent",
                                                 )
+        self.fram_name_teacher = ctk.CTkFrame(self.wn,
+                                              border_width=1,
+                                              corner_radius=9,
+                                              fg_color="transparent")
         self.fram_teacher_notification = ctk.CTkFrame(self.wn,
                                                       fg_color="transparent",
                                                       corner_radius=9,
@@ -1098,7 +1103,7 @@ class manger(admin):
                                      command=self.addOption)
         self.btn_add.grid(row=2, column=7)
         self.listOption = []
-        self.Btn_removeOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
+        self.removeOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
                                                values=['الاستاذ',"التخصص","المادة","المستوى"],
                                                height=50,
                                                width=200,
@@ -1110,7 +1115,7 @@ class manger(admin):
                                                font=("Arial",30,"bold"),
                                                dropdown_font=("Arial",20,"bold"),
                                                command=self.select_Option)
-        self.Btn_removeOption.grid(row=3, column=8)
+        self.removeOption.grid(row=3, column=8)
         self.Entry_removeOption = ctk.CTkOptionMenu(self.fram_addRemove_Option,
                                                     values=[''],
                                                     height=50,
@@ -1127,33 +1132,150 @@ class manger(admin):
                                      text="حذف",
                                      fg_color="red",
                                      font=("Arial",25,"bold"),
-                                     hover_color="red"
+                                     hover_color="red",
+                                     command=self.removeItemInTable
                                      )
         self.btn_removeItem.grid(row=4, column=7)
+        self.error = ctk.CTkLabel(self.fram_addRemove_Option,
+                                  text="المرجوا اختيار خيار اخر",
+                                  text_color="red",
+                                  font=("Arial",20,"bold"))
+        # This code bellow is for display  student that are studying in specific teacher
+        # and for just the student that they have to pay month price 
+        ######################### Section of search by name of the teacher#############
+        self.responsive(self.fram_name_teacher)
+        values = []
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        query.execute("SELECT * FROM teachers")
+        line = query.fetchall()
+        for i in line:
+            values.append(i[1])
+        self.name_teacher = ctk.CTkOptionMenu(self.fram_name_teacher,
+                                         height=60,
+                                         width=300,
+                                         font=("Arial",45,"bold"),
+                                         dropdown_font=("Arial",20,"bold"),
+                                         values=values,
+                                         dropdown_fg_color="gray25",
+                                         fg_color="gray25",
+                                         button_color="gray25",
+                                         button_hover_color="gray75"
+                                         )
+        self.name_teacher.grid(row=5, column=4)
+        self.btn_search_teacher = ctk.CTkButton(self.fram_name_teacher,
+                                                width=120,
+                                                height=50,
+                                                font=("Arial",40,"bold"),
+                                                text="إبحث",
+                                                command=self.teacherNameNotification)
+        self.btn_search_teacher.grid(row=5, column=8)
+        ################################################################################
+        self.responsive(self.fram_teacher_notification)
+        self.teacher_Notification_view = ttk.Treeview(self.fram_teacher_notification)
+        scroll_x = ctk.CTkScrollbar(self.fram_teacher_notification,orientation="horizontal",command=self.teacher_Notification_view.xview)
+        scroll_y = ctk.CTkScrollbar(self.fram_teacher_notification,orientation="vertical",command=self.teacher_Notification_view.yview)
+        self.teacher_Notification_view.configure(xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
+        self.teacher_Notification_view.place(relx=0.0259,rely=0.1,relwidth=0.89)
+        self.teacher_Notification_view['column'] = ("الاسم العائلي","الاسم الشخصي","الرقم السري","التخصص","المستوى")
+        self.teacher_Notification_view.heading("#0", text="ID", anchor="w")
+        self.teacher_Notification_view.heading("#1",text="                 الاسم العائلي",anchor="w")
+        self.teacher_Notification_view.heading("#2", text="                الاسم الشخصي", anchor="w")
+        self.teacher_Notification_view.heading("#3", text="                الرقم السري", anchor="w")
+        self.teacher_Notification_view.heading("#4", text="                       التخصص", anchor="w")
+        self.teacher_Notification_view.heading("#5", text="                       المستوى", anchor="w")
+        self.teacher_Notification_view.column("#0", stretch=False,minwidth=160,width=120)
+        self.teacher_Notification_view.column("#1", stretch=False, minwidth=160, width=200)
+        self.teacher_Notification_view.column("#2", stretch=False, minwidth=160, width=200)
+        self.teacher_Notification_view.column("#3", stretch=False, minwidth=160, width=200)
+        self.teacher_Notification_view.column("#4", stretch=False, minwidth=160, width=200)
+        self.teacher_Notification_view.column("#5", stretch=False, minwidth=160, width=200)
+        scroll_x.grid(row=10,column=1,rowspan=9,columnspan=11,sticky="ew")
+        scroll_y.grid(row=1,column=12,rowspan=9,columnspan=1,sticky="ns")
         # Set default value to the entry removeOption 
         self.select_Option('')
         self.select_Frame("addRemoveOption")
-    
+
+    def teacherNameNotification(self):
+        if self.name_teacher.get() == "":
+            pass
+        else : 
+            conn = sql.connect("student.db")
+            query = conn.cursor()
+            query.execute(f"""SELECT * FROM StudentWarning 
+                          INNER JOIN registerStudent 
+                          ON StudentWarning.id_student = registerStudent.id
+                          WHERE instructor = '{self.name_teacher.get()}' """)
+            line = query.fetchall()
+            count = 0
+            if len(line) > 0 :
+                count+=1
+                for i in line:
+                    self.teacher_Notification_view.insert("","end",text=count,values=(f"            {i[5]}",f"            {i[6]}",f"            {i[2]}",f"            {i[9]}",f"            {i[10]}"))
+    def removeItemInTable(self):
+        option = self.Entry_removeOption.get()
+        table = self.removeOption.get()
+        if option == "" :
+            self.error.grid(row=4,column=4)
+        else:
+            self.error.grid_forget()
+            if table == "التخصص":
+                self.deleteFromDatabase('specialization',option,'specialise')
+            elif table == "المادة":
+                self.deleteFromDatabase('courses',option,'course')
+            elif table == 'المستوى':
+                self.deleteFromDatabase('level_Education',option,'level')
+            elif table == 'الاستاذ':
+                self.deleteFromDatabase('teachers',option,'techer')
+
     def addOption(self):
+        self.error.grid_forget()
         option = self.Btn_addOption.get()
         optionSelect = self.Entry_addOption.get()
         if option == "التخصص":
-            print("takhasos")
+            if optionSelect == "" or optionSelect == " ":
+                self.Entry_addOption.configure(border_color="red")
+            else : 
+                self.Entry_addOption.configure(border_color="gray")
+                self.insertToDatabase('specialization',optionSelect,'specialise')
         elif option == "المادة":
-            print("المادة")
+            if optionSelect == "" or optionSelect == " ":
+                self.Entry_addOption.configure(border_color="red")
+            else : 
+                self.Entry_addOption.configure(border_color="gray")
+                self.insertToDatabase('courses',optionSelect,'course')
         elif option == "الاستاذ":
-            print("ostad")
+            if optionSelect == "" or optionSelect == " ":
+                self.Entry_addOption.configure(border_color="red")
+            else : 
+                self.Entry_addOption.configure(border_color="gray")
+                self.insertToDatabase('teachers',optionSelect,'techer')
         elif option == "المستوى" :
-            print("المستوى")
+            if optionSelect == "" or optionSelect == " ":
+                self.Entry_addOption.configure(border_color="red")
+            else : 
+                self.Entry_addOption.configure(border_color="gray")
+                self.insertToDatabase('level_Education',optionSelect,'level')
+        self.select_Option('')
+        self.Entry_addOption.delete(0,"end")
+
+    def deleteFromDatabase(self,table,value,column):
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        query.execute(f"DELETE FROM {table} WHERE {column} = '{value}'")
+        conn.commit()
+        self.select_Option("")
 
     def insertToDatabase(self,table,value,column):
         conn = sql.connect("student.db")
         query = conn.cursor()
-        query.execute(f"INSERT INTO '{table}'(column) VALUES('{column}') ")
+        query.execute(f"INSERT INTO {table}({column}) VALUES('{value}') ")
+        conn.commit()
+        conn.close()
 
     # This function for make a dynamic changes in the option menu
     def select_Option(self,table):
-        table = self.Btn_removeOption.get()
+        table = self.removeOption.get()
         conn = sql.connect("student.db")
         query = conn.cursor()
         # remove all the element in the list for updating the list
@@ -1180,8 +1302,11 @@ class manger(admin):
             self.fram_addRemove_Option.grid(row=1, column=2, sticky="nsew", columnspan=9,rowspan=9)
         else : self.fram_addRemove_Option.grid_forget()
         if name == "showNotification":
-            self.fram_teacher_notification.grid(row=1, column=2, sticky="nsew", rowspan=9, columnspan=9)
-        else: self.fram_teacher_notification.grid_forget()
+            self.fram_teacher_notification.grid(row=2, column=2, sticky="nsew", pady=5, columnspan=10, rowspan=10)
+            self.fram_name_teacher.grid(row=0, column=2,sticky="nsew",columnspan=10,rowspan=1)
+        else:
+            self.fram_name_teacher.grid_forget()
+            self.fram_teacher_notification.grid_forget()
         if name == "teacherPay":
             self.fram_teacher_pay.grid(row=1, column=2, sticky="nsew", columnspan=9, rowspan=9)
         else : self.fram_teacher_pay.grid_forget() 
@@ -1220,6 +1345,7 @@ class access(manger):
             self.form_Navigation_Manager.grid_forget()
             self.fram_addRemove_Option.grid_forget()
             self.fram_teacher_notification.grid_forget()
+            self.fram_name_teacher.grid_forget()
             self.fram_teacher_pay.grid_forget()
         except:
             pass
