@@ -2,18 +2,18 @@ import customtkinter as ctk
 import sqlite3 as sql
 import re
 from tkinter import messagebox
-from datetime import datetime,date,timedelta
+from datetime import datetime,timedelta
 import webbrowser
 from tkinter import ttk
-systemAcces = {"manager":4545,"Manager":4545,"Admin":1212,"admin":1212}
+systemAcces = {"manager":4545,"admin":1212}
 class interface():
     def __init__(self):
         
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("green")
         self.wn = ctk.CTk()
-        
         self.wn.geometry("1000x500")
+        
     def responsive(self,window):
         # Make the app responsive horizontally
         window.columnconfigure(0,weight=1)
@@ -41,6 +41,7 @@ class interface():
         window.rowconfigure(8, weight=1)
         window.rowconfigure(9, weight=1)
         window.rowconfigure(10, weight=1)
+
     def main(self):
         self.responsive(self.wn)
         self.wn.mainloop()
@@ -419,16 +420,16 @@ class admin(interface):
         self.scrollX = ctk.CTkScrollbar(self.fram_show_student,orientation="horizontal",command=self.dataStudentView.xview)
         self.scrollY = ctk.CTkScrollbar(self.fram_show_student,orientation="vertical",command=self.dataStudentView.yview)
         self.dataStudentView.configure(xscrollcommand=self.scrollX.set,yscrollcommand=self.scrollY.set)
-        self.dataStudentView['column'] = ('firstname','lastname',"code",'dateRegister','course','instructor','payment_day','payment_month')
+        self.dataStudentView['column'] = ('الاسم الشخصي','الاسم العائلي',"الرقم السري",'تاريخ التسجيل','المادة','الاستاذ','يوم الدفع','شهر الدفع')
         self.dataStudentView.heading("#0",text='Id',anchor="w")
-        self.dataStudentView.heading("#1",text="firstname",anchor="w")
-        self.dataStudentView.heading("#2",text='lastname',anchor="w")
-        self.dataStudentView.heading("#3",text='code',anchor="w")
-        self.dataStudentView.heading("#4",text='dateRegister',anchor="w")
-        self.dataStudentView.heading("#5",text='course',anchor="w")
-        self.dataStudentView.heading("#6",text='instructor',anchor="w")
-        self.dataStudentView.heading("#7",text='payment_day',anchor="w")
-        self.dataStudentView.heading("#8",text='payment_month',anchor="w")
+        self.dataStudentView.heading("#1",text="الاسم الشخصي",anchor="w")
+        self.dataStudentView.heading("#2",text='الاسم العائلي',anchor="w")
+        self.dataStudentView.heading("#3",text='الرقم السري',anchor="w")
+        self.dataStudentView.heading("#4",text='تاريخ التسجيل',anchor="w")
+        self.dataStudentView.heading("#5",text='المادة',anchor="w")
+        self.dataStudentView.heading("#6",text='الاستاذ',anchor="w")
+        self.dataStudentView.heading("#7",text='يوم الدفع',anchor="w")
+        self.dataStudentView.heading("#8",text='شهر الدفع',anchor="w")
         self.dataStudentView.column("#0",stretch=False,minwidth=40,width=50)
         self.dataStudentView.column("#1",stretch=False,minwidth=120,width=140)
         self.dataStudentView.column("#2",stretch=False,minwidth=120,width=140)
@@ -459,7 +460,7 @@ class admin(interface):
         self.notification_View.column("#2",stretch=False,minwidth=120,width=190)
         self.notification_View.column("#3",stretch=False,minwidth=120,width=190)
         self.notification_View.column("#4",stretch=False,minwidth=120,width=190)
-        self.notification_View.place(relx=0.0259, rely=0.1, width=600, height=400)
+        self.notification_View.place(relx=0.0259,rely=0.1,relwidth=0.89)
         self.scrollX_Notification.grid(row=10, column=1,sticky="ew",columnspan=10)
         self.scrollY_Notification.grid(row=1, column=12, sticky="ns",rowspan=9)
         # This code bellow is for remove student from the database
@@ -513,7 +514,7 @@ class admin(interface):
         self.Students_view.column("#7",stretch=False,minwidth=100,width=160)
         self.Students_view.column("#8",stretch=False,minwidth=80,width=110)
         self.Students_view.column("#9",stretch=False,minwidth=100,width=160)
-        self.Students_view.place(relx=0.0259, rely=0.1, width=600, height=400)
+        self.Students_view.place(relx=0.0259,rely=0.1,relwidth=0.89)
         self.scrollX_remove.grid(row=10, column=1, sticky="ew",columnspan=10)
         self.scrollY_remove.grid(row=1, column=12, sticky="ns",rowspan=9)
         conn = sql.connect("student.db")
@@ -545,7 +546,6 @@ class admin(interface):
         self.description6 = ctk.CTkLabel(self.fram_About_Founders,
                                         text="المدون في الاسفل وفي الاخير اتقدم بالشكر للسيد المحترم سعيد اشعود الذي اتاح لي الفرصة لبناء هذا التطبيق ",
                                         font=("Arial",15,"bold"))
-        
         self.description1.grid(row=1,column=1,columnspan=8,sticky="nsew")
         self.description2.grid(row=2,column=1,columnspan=8,sticky="nsew")
         self.description3.grid(row=3,column=1,columnspan=8,sticky="nsew")
@@ -564,6 +564,7 @@ class admin(interface):
         self.email.grid(row=7, column=2, sticky="nsew")
         self.email.bind("<Button-1>",self.send_message)
         self.select_Fram_By_Name("addStudent")
+
     def send_message(self,mail):
         email = self.email.cget("text")
         webbrowser.open("mailto:"+email)
@@ -888,6 +889,7 @@ class admin(interface):
                 self.codeEdentifier_Entry.configure(border_color="red")
         self.conn.commit()
         self.conn.close()
+
     # This function for insert payment course into our database and update some table
     def insertRowInDatabase(self,newdate,specialization,code,dayPayment,monthPay,level_education,course,price,instructor):
         self.conn = sql.connect("student.db")
@@ -1020,6 +1022,10 @@ class manger(admin):
                                                       corner_radius=9,
                                                       border_width=1,
                                                       )
+        self.fram_teacher_choisse = ctk.CTkFrame(self.wn,
+                                                 fg_color="transparent",
+                                                 corner_radius=9,
+                                                 border_width=1)
         self.fram_teacher_pay = ctk.CTkFrame(self.wn,
                                              border_width=1,
                                              corner_radius=9,
@@ -1176,7 +1182,6 @@ class manger(admin):
         scroll_x = ctk.CTkScrollbar(self.fram_teacher_notification,orientation="horizontal",command=self.teacher_Notification_view.xview)
         scroll_y = ctk.CTkScrollbar(self.fram_teacher_notification,orientation="vertical",command=self.teacher_Notification_view.yview)
         self.teacher_Notification_view.configure(xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
-        self.teacher_Notification_view.place(relx=0.0259,rely=0.1,relwidth=0.89)
         self.teacher_Notification_view['column'] = ("الاسم العائلي","الاسم الشخصي","الرقم السري","التخصص","المستوى")
         self.teacher_Notification_view.heading("#0", text="ID", anchor="w")
         self.teacher_Notification_view.heading("#1",text="                 الاسم العائلي",anchor="w")
@@ -1190,13 +1195,116 @@ class manger(admin):
         self.teacher_Notification_view.column("#3", stretch=False, minwidth=160, width=200)
         self.teacher_Notification_view.column("#4", stretch=False, minwidth=160, width=200)
         self.teacher_Notification_view.column("#5", stretch=False, minwidth=160, width=200)
+        self.teacher_Notification_view.place(relx=0.0259,rely=0.1,relwidth=0.89)
         scroll_x.grid(row=10,column=1,rowspan=9,columnspan=11,sticky="ew")
         scroll_y.grid(row=1,column=12,rowspan=9,columnspan=1,sticky="ns")
+        # This code bellow is for teacher Payment
+        ############################ This code is for search by the name of the teacher and how much he take for a student ########
+        self.responsive(self.fram_teacher_choisse)
+        self.paysForStudent = ctk.CTkEntry(self.fram_teacher_choisse,
+                                           height=40,
+                                           width=100,
+                                           font=("Arial",25,"bold"))
+        self.paysForStudent.grid(row=4,column=1)
+        self.paysForStudent_label = ctk.CTkLabel(self.fram_teacher_choisse,
+                                                 text="اجر الاستاذ على كل تلميذ",
+                                                 font=("Arial",18,"bold"))
+        self.paysForStudent_label.grid(row=4,column=2)
+        self.teacherName = ctk.CTkOptionMenu(self.fram_teacher_choisse,
+                                             values=values,
+                                             font=("Arial",25,"bold"),
+                                             dropdown_font=("Arial",15,"bold"),
+                                             fg_color="gray25",
+                                             button_color="gray25",
+                                             button_hover_color="gray75",
+                                             width=200,
+                                             height=40)
+        self.teacherName.grid(row=4, column=5)
+        self.teacherName_label = ctk.CTkLabel(self.fram_teacher_choisse,
+                                              text="اسم الاستاذ",
+                                              font=("Arial",18,"bold"))
+        self.teacherName_label.grid(row=4, column=8)
+        month_values = [""]
+        month_values.extend(list(range(1,13)))
+        self.monthEntry = ttk.Combobox(self.fram_teacher_choisse,
+                                      values=month_values,
+                                      state="readonly",
+                                      width=9)
+        self.monthEntry.grid(row=6,column=3)
+        self.monthLabel = ctk.CTkLabel(self.fram_teacher_choisse,
+                                       text="شهر الدفع",
+                                       font=("Arial",25,"bold"))
+        self.monthLabel.grid(row=6, column=4)
+        self.btnGetPayTeacher = ctk.CTkButton(self.fram_teacher_choisse,
+                                              text="حساب الاجر",
+                                              font=("Arial",18,"bold"),
+                                              height=40,
+                                              width=120,
+                                              command=self.getTeacherPays
+                                              )
+        self.btnGetPayTeacher.grid(row=9, column=4)
+        ############################################################
+        # This code bellow is for Calculate the teacher pay
+        self.teacher_pay_view = ttk.Treeview(self.fram_teacher_pay,
+                                             )
+        self.teacher_pay_view['column'] = ["كل التلاميذ", "تلاميذ دفعوا", "تلاميذ لم يدفعوا", "المبلغ الاجمالي", "مبلغ الاستاذ", "مبلغ الادارة"]
+        self.teacher_pay_view.heading("#0",text="ID", anchor="w")
+        self.teacher_pay_view.heading("#1",text="كل التلاميذ", anchor="w")
+        self.teacher_pay_view.heading("#2",text="تلاميذ دفعوا", anchor="w")
+        self.teacher_pay_view.heading("#3",text="تلاميذ لم يدفعوا", anchor="w")
+        self.teacher_pay_view.heading("#4",text="المبلغ الاجمالي", anchor="w")
+        self.teacher_pay_view.heading("#5",text="مبلغ الاستاذ", anchor="w")
+        self.teacher_pay_view.heading("#6",text="مبلغ الادارة", anchor="w")
+        self.teacher_pay_view.column("#0", width=105, minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#1",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#2",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#3",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#4",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#5",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.column("#6",width=105,minwidth=40, stretch=False)
+        self.teacher_pay_view.place(relx=0.0259, rely=0.1, relwidth=0.89, relheight=0.24)
         # Set default value to the entry removeOption 
         self.select_Option('')
         self.select_Frame("addRemoveOption")
 
+    def getTeacherPays(self):
+        teacher = self.teacherName.get()
+        month = self.monthEntry.get()
+        pays = self.paysForStudent.get()
+        if teacher == "" or month == "":
+            pass
+        else :
+            if not pays.isdigit() :
+                self.paysForStudent.configure(border_color="red")
+            elif pays.isdigit():
+                items = self.teacher_pay_view.get_children()
+                for item in items:
+                    self.teacher_pay_view.delete(item)
+                self.paysForStudent.configure(border_color="gray")
+                conn = sql.connect("student.db")
+                query = conn.cursor()
+                query.execute(f"SELECT COUNT(id) AS total_student FROM registerStudent WHERE instructor = '{teacher}'")
+                total_student = query.fetchall()
+                query.execute(f"""SELECT COUNT(student_id) AS numStudent, SUM(price) AS TOTAL_PRICE, (COUNT(student_id) * {int(pays)}) AS teacherPay FROM paymentStudent
+                            INNER JOIN registerStudent 
+                            ON paymentStudent.student_id = registerStudent.id
+                            WHERE instructor = '{teacher}' AND payment_month = '{month}'""")
+                line = query.fetchall()
+                query.execute(f"""SELECT COUNT(id_student) AS student_notpay FROM StudentWarning
+                            INNER JOIN registerStudent
+                            ON StudentWarning.id_student = registerStudent.id
+                            WHERE instructor = '{teacher}'""")
+                student_notPay = query.fetchall()
+                if line[0][1] != None :
+                    list_info = [total_student[0][0], line[0][0], line[0][1], line[0][2], student_notPay[0][0], int(line[0][1]) - int(line[0][2])]
+                else :
+                    list_info = [total_student[0][0], line[0][0], line[0][1], line[0][2], student_notPay[0][0], 0]
+                self.teacher_pay_view.insert("", "end", text=1,values=(list_info[0], list_info[1], list_info[4], f"{list_info[2]} Dh", f"{list_info[3]} Dh", f"{list_info[5]} Dh"))
+
     def teacherNameNotification(self):
+        items = self.teacher_Notification_view.get_children()
+        for item in items:
+            self.teacher_Notification_view.delete(item)
         if self.name_teacher.get() == "":
             pass
         else : 
@@ -1212,6 +1320,7 @@ class manger(admin):
                 count+=1
                 for i in line:
                     self.teacher_Notification_view.insert("","end",text=count,values=(f"            {i[5]}",f"            {i[6]}",f"            {i[2]}",f"            {i[9]}",f"            {i[10]}"))
+    
     def removeItemInTable(self):
         option = self.Entry_removeOption.get()
         table = self.removeOption.get()
@@ -1308,8 +1417,11 @@ class manger(admin):
             self.fram_name_teacher.grid_forget()
             self.fram_teacher_notification.grid_forget()
         if name == "teacherPay":
-            self.fram_teacher_pay.grid(row=1, column=2, sticky="nsew", columnspan=9, rowspan=9)
-        else : self.fram_teacher_pay.grid_forget() 
+            self.fram_teacher_pay.grid(row=4, column=2, sticky="nsew", pady=5, columnspan=10, rowspan=8)
+            self.fram_teacher_choisse.grid(row=0, column=2, sticky="nsew",columnspan=10, rowspan=4)
+        else : 
+            self.fram_teacher_pay.grid_forget()
+            self.fram_teacher_choisse.grid_forget() 
     
     def function_addRemoveOption(self):
         self.select_Frame("addRemoveOption")
@@ -1319,7 +1431,6 @@ class manger(admin):
     
     def function_teacherPay(self):
         self.select_Frame("teacherPay")
-
 
 class access(manger):
     def __init__(self):
@@ -1347,6 +1458,7 @@ class access(manger):
             self.fram_teacher_notification.grid_forget()
             self.fram_name_teacher.grid_forget()
             self.fram_teacher_pay.grid_forget()
+            self.fram_teacher_choisse.grid_forget()
         except:
             pass
         self.userLabel = ctk.CTkLabel(self.wn,
@@ -1385,36 +1497,33 @@ class access(manger):
         self.Loginbutton.grid(row=7,column=5,sticky="nsew")
 
     def checkLogin(self):
-        if self.userEntry.get() == "Manager" or self.userEntry.get() == "manager":
+        if self.userEntry.get().lower() == "manager":
             self.userEntry.configure(border_color="green")
             if self.codeEntry.get().isdigit():
-                if systemAcces[str(self.userEntry.get())] == int(str(self.codeEntry.get())):
+                if systemAcces[str(self.userEntry.get().lower())] == int(str(self.codeEntry.get())):
                     self.codeEntry.configure(border_color="green")
                     self.valid = "manager"
-
-                elif systemAcces[str(self.userEntry.get())] != int(str(self.codeEntry.get())):
+                elif systemAcces[str(self.userEntry.get().lower())] != int(str(self.codeEntry.get())):
                     self.codeEntry.configure(border_color="red")
                     self.valid = ""
-
             elif not (self.codeEntry.get().isdigit()):
                 self.codeEntry.configure(border_color="red")
                 self.valid = ""
-
-        elif self.userEntry.get() == "Admin" or self.userEntry.get() == "admin":
+        elif self.userEntry.get().lower() == "admin":
             self.userEntry.configure(border_color="green")
             if self.codeEntry.get().isdigit():
-                if systemAcces[str(self.userEntry.get())] == int(str(self.codeEntry.get())):
+                if systemAcces[str(self.userEntry.get().lower())] == int(str(self.codeEntry.get())):
                     self.codeEntry.configure(border_color="green")
                     self.valid = "admin"
 
-                elif systemAcces[str(self.userEntry.get())] != int(str(self.codeEntry.get())):
+                elif systemAcces[str(self.userEntry.get().lower())] != int(str(self.codeEntry.get())):
                     self.codeEntry.configure(border_color="red")
                     self.valid = ""
 
             elif not (self.codeEntry.get().isdigit()):
                 self.codeEntry.configure(border_color="red")
                 self.valid = ""
-        elif self.userEntry.get() == "" or self.userEntry.get() != "admin" or self.userEntry.get() != "Admin" or self.userEntry.get() != "manager" or self.userEntry.get() != "Manager":
+        elif self.userEntry.get() == "" or self.userEntry.get() != "admin" or self.userEntry.get() != "manager":
             self.userEntry.configure(border_color="red")
             self.valid = ""
         if self.valid == "manager":
