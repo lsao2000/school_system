@@ -5,6 +5,7 @@ from tkinter import messagebox
 from datetime import datetime,timedelta
 import webbrowser
 from tkinter import ttk
+import xlsxwriter
 systemAcces = {"manager":4545,"admin":1212}
 class interface():
     def __init__(self):
@@ -463,6 +464,13 @@ class admin(interface):
         self.notification_View.place(relx=0.0259,rely=0.1,relwidth=0.89)
         self.scrollX_Notification.grid(row=10, column=1,sticky="ew",columnspan=10)
         self.scrollY_Notification.grid(row=1, column=12, sticky="ns",rowspan=9)
+        self.btn_DownloadExcelNotification = ctk.CTkButton(self.fram_notification,
+                                                           text="تنزيل ملف الاشعارات",
+                                                           width=100,
+                                                           height=60,
+                                                           font=("Arial", 40, "bold"),
+                                                           command=self.getExcelStudentNotification)
+        self.btn_DownloadExcelNotification.grid(row=8, column=6)
         # This code bellow is for remove student from the database
         self.responsive(self.fram_remove_student)
         self.responsive(self.fram_code_removeTop)
@@ -577,6 +585,33 @@ class admin(interface):
         for i in line:
             list.append(i[1])
 
+    def getExcelStudentNotification(self):
+        nameFile = str(datetime.today()).split(" ")[0]
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        workbook = xlsxwriter.Workbook(f"./paymentFiles/{nameFile}.xlsx")
+        bold = workbook.add_format({'bold': True})
+        query.execute(f"""SELECT first_name,last_name,specialisation from StudentWarning 
+                      INNER JOIN registerStudent 
+                      ON StudentWarning.id_student = registerStudent.id""")
+        line = query.fetchall()
+        worksheet = workbook.add_worksheet()
+        # worksheet.write(0, 0, "الثمن", bold)
+        # worksheet.write(0, 1, "المستوى", bold)
+        # worksheet.write(0, 3, "تاريخ التسجيل", bold)
+        worksheet.write(0, 2, "الاسم الشخصي", bold)
+        worksheet.write(0, 1, "الاسم العائلي", bold)
+        worksheet.write(0, 0, "التخصص", bold)
+        # insert all the data from database to the file
+        row = 1
+        if len(line) > 0:
+            for i in line:
+                for j in range(0, len(i)):
+                    worksheet.write(row, j, i[j])
+                row += 1
+        workbook.close()
+        messagebox.showinfo("info",'paymentFiles لقد تم تحميل الملف في المجلد ')
+
     def deleteStudent(self,code):
         conn = sql.connect("student.db")
         query = conn.cursor()
@@ -610,13 +645,13 @@ class admin(interface):
         query = conn.cursor()
         query.execute("SELECT code FROM registerStudent")
         lines = query.fetchall()
-        if self.Fname_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z]',self.Fname_Entry.get()):
+        if self.Fname_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z\s]',self.Fname_Entry.get()) :
             self.Fname_Entry.configure(border_color="red",border_width=1)
             self.ValidFname = "No"
         else :
             self.Fname_Entry.configure(border_color="green",border_width=1)
             self.ValidFname = "Yes"
-        if self.Lname_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z]',self.Lname_Entry.get()):
+        if self.Lname_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z\s]',self.Lname_Entry.get()):
             self.Lname_Entry.configure(border_color="red",border_width=1)
             self.ValidLname = "No"
         else:
@@ -748,13 +783,13 @@ class admin(interface):
         self.conn.close() 
 
     def checkPaymentStudent(self):
-        if self.first_name_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z]',self.first_name_Entry.get()):
+        if self.first_name_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z\s]',self.first_name_Entry.get()):
             self.first_name_Entry.configure(border_color="red",border_width=1)
             valid_firstname = "No"
         else :
             self.first_name_Entry.configure(border_color="green",border_width=1)
             valid_firstname = "Yes"
-        if self.last_name_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z]',self.last_name_Entry.get()):
+        if self.last_name_Entry.get() == "" or re.findall(r'[^؀-ۿa-zA-Z\s]',self.last_name_Entry.get()):
             self.last_name_Entry.configure(border_color="red",border_width=1)
             valid_lastname = "No"
         else :
@@ -841,7 +876,7 @@ class admin(interface):
         self.conn = sql.connect("student.db")
         self.query = self.conn.cursor()
         if dateRegister == "" :
-            self.query.execute(f"INSERT INTO registerStudent (first_name,last_name,code) VALUES('{lname}','{fname}','{code}')")
+            self.query.execute(f"INSERT INTO registerStudent (first_name,last_name,code) VALUES('{fname}','{lname}','{code}')")
             # Delete all the value that are given before for insert another student to database
             self.Fname_Entry.delete(0,'end')
             self.Lname_Entry.delete(0,"end")
@@ -1031,6 +1066,10 @@ class manger(admin):
                                              corner_radius=9,
                                              fg_color="transparent",
                                              )
+        self.fram_Delete_All = ctk.CTkFrame(self.wn,
+                                            fg_color="transparent",
+                                            corner_radius=9,
+                                            border_width=1)
         self.welcomeManager = ctk.CTkLabel(self.form_Navigation_Manager,
                                             text="مرحبا بالمدير",
                                             font=("Arial",30,"bold"),
@@ -1071,6 +1110,17 @@ class manger(admin):
                                               text="اجر الاستاذ",
                                               command=self.function_teacherPay)
         self.tacher_month_payBtn.pack(fill="x")
+        self.DeletAllDataBtn = ctk.CTkButton(self.form_Navigation_Manager,
+                                             text='مسح كل البيانات',
+                                             corner_radius=0,
+                                             height=90,
+                                             fg_color="transparent",
+                                             border_spacing=10, 
+                                             anchor="center",
+                                             font=("Arial",18,"bold"),
+                                             hover_color=("gray70","gray30"),
+                                             command=self.DeletAllData)
+        self.DeletAllDataBtn.pack(fill="x")
         self.logout_manager = ctk.CTkButton(self.form_Navigation_Manager,
                                             text="تسجيل الخروج",
                                             corner_radius=0,
@@ -1245,6 +1295,7 @@ class manger(admin):
         self.btnGetPayTeacher.grid(row=9, column=4)
         ############################################################
         # This code bellow is for Calculate the teacher pay
+        self.responsive(self.fram_teacher_pay)
         self.teacher_pay_view = ttk.Treeview(self.fram_teacher_pay,
                                              )
         self.teacher_pay_view['column'] = ["كل التلاميذ", "تلاميذ دفعوا", "تلاميذ لم يدفعوا", "المبلغ الاجمالي", "مبلغ الاستاذ", "مبلغ الادارة"]
@@ -1263,9 +1314,86 @@ class manger(admin):
         self.teacher_pay_view.column("#5",width=105,minwidth=40, stretch=False)
         self.teacher_pay_view.column("#6",width=105,minwidth=40, stretch=False)
         self.teacher_pay_view.place(relx=0.0259, rely=0.1, relwidth=0.89, relheight=0.24)
+
+        self.Download_file_student_pay = ctk.CTkButton(self.fram_teacher_pay,
+                                                       text='تنزيل ملف الاستاذ',
+                                                       height=50,
+                                                       font=("Arial", 30, "bold"),
+                                                       state="disabled",
+                                                       command=self.DownloadFile
+                                                       )
+        self.Download_file_student_pay.grid(row=7, column=5)
+        # This code bellow is for delete all the student from our database
+        self.responsive(self.fram_Delete_All)
+        self.label_asking_confirmation = ctk.CTkLabel(self.fram_Delete_All,
+                                                      text="ادخل الرقم السري",
+                                                      font=("Arial",28, 'bold'))
+        self.label_asking_confirmation.grid(row=2,column=6)
+        self.Entry_asking_confirmation = ctk.CTkEntry(self.fram_Delete_All,
+                                                      width=130,
+                                                      height=60,
+                                                      font=("Arial",20,"bold"))
+        self.Entry_asking_confirmation.grid(row=2, column=4)
+        self.btn_asking_confirmation = ctk.CTkButton(self.fram_Delete_All,
+                                                     text="مسح الكل",
+                                                     font=("Arial", 25, 'bold'),
+                                                     height=60,
+                                                     width=140,
+                                                     command= self.cleanDataBase)
+        self.btn_asking_confirmation.grid(row=5, column=5)
         # Set default value to the entry removeOption 
         self.select_Option('')
         self.select_Frame("addRemoveOption")
+
+    def DownloadFile(self):
+        teacherfile = self.teacherName.get().split(" ")
+        dateFile = str(datetime.today()).split(" ")[0]
+        nameFile = teacherfile[1]+"~"+teacherfile[0]+"#"+dateFile
+        teacher = self.teacherName.get()
+        month = self.monthEntry.get()
+        # initialize the sqlite and the xslxwriter
+        conn = sql.connect("student.db")
+        query = conn.cursor()
+        workbook = xlsxwriter.Workbook(f'./paymentFiles/{nameFile}.xlsx')
+        bold = workbook.add_format({'bold': True})
+        # get all data from database 
+        query.execute(f"""SELECT price,education_level,specialisation,date_register,first_name,last_name FROM paymentStudent
+                                    INNER JOIN registerStudent 
+                                    ON paymentStudent.student_id = registerStudent.id
+                                    WHERE instructor = '{teacher}' AND payment_month = '{month}'""")
+        line = query.fetchall()
+        # Insert the heading row for better understanding the data into this file 
+        worksheet = workbook.add_worksheet()
+        worksheet.write(0, 0, "الثمن", bold)
+        worksheet.write(0, 1, "المستوى", bold)
+        worksheet.write(0, 2, "التخصص", bold)
+        worksheet.write(0, 3, "تاريخ التسجيل", bold)
+        worksheet.write(0, 4, "الاسم الشخصي", bold)
+        worksheet.write(0, 5, "الاسم العائلي", bold)
+        # insert all the data from database to the file
+        row = 1
+        if len(line) > 0:
+            for i in line:
+                for j in range(0, len(i)):
+                    worksheet.write(row, j, i[j])
+                row += 1
+        workbook.close()
+
+    def cleanDataBase (self) :
+        if (self.Entry_asking_confirmation.get() == "4545"):
+            conn = sql.connect("student.db")
+            query = conn.cursor()
+            query.execute("DELETE FROM registerStudent")
+            conn.commit()
+            query.execute("DELETE FROM paymentStudent")
+            conn.commit()
+            query.execute("DELETE FROM StudentWarning")
+            conn.commit()
+            self.Entry_asking_confirmation.configure(border_color ="gray")
+            messagebox.showinfo("التحديثات","تم مسح كل البيانات")
+        else : 
+            self.Entry_asking_confirmation.configure(border_color ="red")
+        
 
     def getTeacherPays(self):
         teacher = self.teacherName.get()
@@ -1277,6 +1405,7 @@ class manger(admin):
             if not pays.isdigit() :
                 self.paysForStudent.configure(border_color="red")
             elif pays.isdigit():
+                self.Download_file_student_pay.configure(state="normal")
                 items = self.teacher_pay_view.get_children()
                 for item in items:
                     self.teacher_pay_view.delete(item)
@@ -1422,6 +1551,9 @@ class manger(admin):
         else : 
             self.fram_teacher_pay.grid_forget()
             self.fram_teacher_choisse.grid_forget() 
+        if name == "DeleteAllData" :
+            self.fram_Delete_All.grid(row=1, column=2, sticky="nsew", pady=5, columnspan=10, rowspan=10)
+        else : self.fram_Delete_All.grid_forget()
     
     def function_addRemoveOption(self):
         self.select_Frame("addRemoveOption")
@@ -1431,6 +1563,9 @@ class manger(admin):
     
     def function_teacherPay(self):
         self.select_Frame("teacherPay")
+    
+    def DeletAllData(self):
+        self.select_Frame("DeleteAllData")
 
 class access(manger):
     def __init__(self):

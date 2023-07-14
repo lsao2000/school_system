@@ -19,3 +19,5 @@
 
 ### required library
     pip install customtkinter
+    pip install datetime
+    pip install XlsxWriter
