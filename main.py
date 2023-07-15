@@ -591,17 +591,15 @@ class admin(interface):
         query = conn.cursor()
         workbook = xlsxwriter.Workbook(f"./paymentFiles/{nameFile}.xlsx")
         bold = workbook.add_format({'bold': True})
-        query.execute(f"""SELECT first_name,last_name,specialisation from StudentWarning 
+        query.execute(f"""SELECT course,date_register,first_name || " " || last_name AS fullname from StudentWarning 
                       INNER JOIN registerStudent 
-                      ON StudentWarning.id_student = registerStudent.id""")
+                      ON StudentWarning.id_student = registerStudent.id 
+                      ORDER BY fullname """)
         line = query.fetchall()
         worksheet = workbook.add_worksheet()
-        # worksheet.write(0, 0, "الثمن", bold)
-        # worksheet.write(0, 1, "المستوى", bold)
-        # worksheet.write(0, 3, "تاريخ التسجيل", bold)
-        worksheet.write(0, 2, "الاسم الشخصي", bold)
-        worksheet.write(0, 1, "الاسم العائلي", bold)
-        worksheet.write(0, 0, "التخصص", bold)
+        worksheet.write(0, 0, "المادة", bold)
+        worksheet.write(0, 1, "تاريخ التسجيل", bold)
+        worksheet.write(0, 2, "الاسم الكامل", bold)
         # insert all the data from database to the file
         row = 1
         if len(line) > 0:
