@@ -1278,11 +1278,51 @@ class manger(admin):
                                       values=month_values,
                                       state="readonly",
                                       width=9)
-        self.monthEntry.grid(row=6,column=3)
+        self.monthEntry.grid(row=6,column=1)
         self.monthLabel = ctk.CTkLabel(self.fram_teacher_choisse,
                                        text="شهر الدفع",
                                        font=("Arial",25,"bold"))
-        self.monthLabel.grid(row=6, column=4)
+        self.monthLabel.grid(row=6, column=2)
+        value_spcialization = []
+        query.execute("SELECT * FROM specialization")
+        lines = query.fetchall()
+        for i in lines:
+            value_spcialization.append(i[1])
+        self.Menu_specialization = ctk.CTkOptionMenu(  self.fram_teacher_choisse,
+                                                        values=value_spcialization,
+                                                        height=40,
+                                                        width=100,
+                                                        font=("Arial",20,"bold"),
+                                                        dropdown_font=("Arial",15,"bold"),
+                                                        dropdown_fg_color="gray25",
+                                                        fg_color="gray25",
+                                                        button_color="gray25",
+                                                        button_hover_color="gray75")
+        self.Menu_specialization.grid(row=6, column=5)
+        self.label_specialization = ctk.CTkLabel(self.fram_teacher_choisse,
+                                                 text="تخصص",
+                                                 font=("Arial", 18, "bold"))
+        self.label_specialization.grid(row=6, column=8)
+        value_Level_Education = []
+        query.execute("SELECT * FROM level_Education")
+        line_Education = query.fetchall()
+        for i in line_Education:
+            value_Level_Education.append(i[1])
+        self.Menu_level_Education = ctk.CTkOptionMenu(  self.fram_teacher_choisse,
+                                                        values=value_Level_Education,
+                                                        height=40,
+                                                        width=100,
+                                                        font=("Arial",20,"bold"),
+                                                        dropdown_font=("Arial",15,"bold"),
+                                                        dropdown_fg_color="gray25",
+                                                        fg_color="gray25",
+                                                        button_color="gray25",
+                                                        button_hover_color="gray75")
+        self.Menu_level_Education.grid(row=8, column=2)
+        self.label_level_Eduction = ctk.CTkLabel(self.fram_teacher_choisse,
+                                                 text="المستوى",
+                                                 font=("Arial", 23, "bold"))
+        self.label_level_Eduction.grid(row=8, column=5)
         self.btnGetPayTeacher = ctk.CTkButton(self.fram_teacher_choisse,
                                               text="حساب الاجر",
                                               font=("Arial",18,"bold"),
@@ -1312,7 +1352,6 @@ class manger(admin):
         self.teacher_pay_view.column("#5",width=105,minwidth=40, stretch=False)
         self.teacher_pay_view.column("#6",width=105,minwidth=40, stretch=False)
         self.teacher_pay_view.place(relx=0.0259, rely=0.1, relwidth=0.89, relheight=0.24)
-
         self.Download_file_student_pay = ctk.CTkButton(self.fram_teacher_pay,
                                                        text='تنزيل ملف الاستاذ',
                                                        height=50,
@@ -1344,9 +1383,11 @@ class manger(admin):
         self.select_Frame("addRemoveOption")
 
     def DownloadFile(self):
+        specialization = self.Menu_specialization.get()
+        level_Education = self.Menu_level_Education.get()
         teacherfile = self.teacherName.get().split(" ")
         dateFile = str(datetime.today()).split(" ")[0]
-        nameFile = teacherfile[1]+"~"+teacherfile[0]+"#"+dateFile
+        nameFile = f"{teacherfile[1]}~{teacherfile[0]}#{dateFile}#{specialization}#{level_Education}"
         teacher = self.teacherName.get()
         month = self.monthEntry.get()
         # initialize the sqlite and the xslxwriter
@@ -1358,7 +1399,8 @@ class manger(admin):
         query.execute(f"""SELECT price,education_level,specialisation,date_register,first_name,last_name FROM paymentStudent
                                     INNER JOIN registerStudent 
                                     ON paymentStudent.student_id = registerStudent.id
-                                    WHERE instructor = '{teacher}' AND payment_month = '{month}'""")
+                                    WHERE instructor = '{teacher}' AND payment_month = '{month}'
+                                    AND specialisation = '{specialization}' AND education_level = '{level_Education}' """)
         line = query.fetchall()
         # Insert the heading row for better understanding the data into this file 
         worksheet = workbook.add_worksheet()
@@ -1376,6 +1418,7 @@ class manger(admin):
                     worksheet.write(row, j, i[j])
                 row += 1
         workbook.close()
+        messagebox.showinfo("إشعار", "paymentFiles لقد تم تنزيل الملف في ")
 
     def cleanDataBase (self) :
         if (self.Entry_asking_confirmation.get() == "4545"):
@@ -1397,7 +1440,9 @@ class manger(admin):
         teacher = self.teacherName.get()
         month = self.monthEntry.get()
         pays = self.paysForStudent.get()
-        if teacher == "" or month == "":
+        specialization = self.Menu_specialization.get()
+        level_Education = self.Menu_level_Education.get()
+        if teacher == "" or month == "" or specialization == "" or level_Education == "":
             pass
         else :
             if not pays.isdigit() :
@@ -1410,17 +1455,19 @@ class manger(admin):
                 self.paysForStudent.configure(border_color="gray")
                 conn = sql.connect("student.db")
                 query = conn.cursor()
-                query.execute(f"SELECT COUNT(id) AS total_student FROM registerStudent WHERE instructor = '{teacher}'")
+                query.execute(f"""SELECT COUNT(id) AS total_student FROM registerStudent 
+                              WHERE instructor = '{teacher}' AND specialisation = '{specialization}' AND education_level = '{level_Education}'""")
                 total_student = query.fetchall()
                 query.execute(f"""SELECT COUNT(student_id) AS numStudent, SUM(price) AS TOTAL_PRICE, (COUNT(student_id) * {int(pays)}) AS teacherPay FROM paymentStudent
                             INNER JOIN registerStudent 
                             ON paymentStudent.student_id = registerStudent.id
-                            WHERE instructor = '{teacher}' AND payment_month = '{month}'""")
+                            WHERE instructor = '{teacher}' AND payment_month = '{month}'
+                            AND specialisation = '{specialization}' AND education_level = '{level_Education}' """)
                 line = query.fetchall()
                 query.execute(f"""SELECT COUNT(id_student) AS student_notpay FROM StudentWarning
                             INNER JOIN registerStudent
                             ON StudentWarning.id_student = registerStudent.id
-                            WHERE instructor = '{teacher}'""")
+                            WHERE instructor = '{teacher}' AND specialisation = '{specialization}' AND education_level = '{level_Education}'""")
                 student_notPay = query.fetchall()
                 if line[0][1] != None :
                     list_info = [total_student[0][0], line[0][0], line[0][1], line[0][2], student_notPay[0][0], int(line[0][1]) - int(line[0][2])]
